@@ -1,0 +1,97 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta content="A fully featured admin theme which can be used to build CRM, CMS, etc." name="description" />
+        <meta content="Coderthemes" name="author" />
+        <link rel="shortcut icon" href="{% static 'assets/images/favicon.ico' %}">
+
+        <link href="{% static 'assets/css/vendor/jquery-jvectormap-1.2.2.css' %}" rel="stylesheet" type="text/css" />
+
+        <link href="{% static 'assets/css/icons.min.css' %}" rel="stylesheet" type="text/css" />
+        <link href="{% static 'assets/css/app-modern.min.css' %}" rel="stylesheet" type="text/css" id="light-style" />
+        <link href="{% static 'assets/css/app-modern-dark.min.css' %}" rel="stylesheet" type="text/css" id="dark-style" />
+        
+    </head>
+    <body class="loading" data-layout="detached" data-layout-config='{"leftSidebarCondensed":false,"darkMode":false, "showRightSidebarOnStart": true}'>
+
+        <!-- @@include('./partials/topbar-dark.html') -->
+        {% include "topbar-dark.html" %}
+        <!-- Start Content-->
+        <div class="container-fluid">
+
+            <!-- Begin page -->
+            <div class="wrapper">
+
+                <!-- @@include('./partials/detached-left-sidebar.html') -->
+                {% include "detached-left-sidebar.html" %}
+                <div class="content-page">
+                    <div class="content">
+                        
+                        <!-- start page title -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="page-title-box">
+                                    <div class="page-title-right">
+                                        <ol class="breadcrumb m-0">
+                                            <li class="breadcrumb-item"><a href="{% url 'home' %}">Dashboard</a></li>
+                                        </ol>
+                                    </div>
+                                    <!-- <h4 class="page-title">Profile 2</h4> -->
+                                </div>
+                            </div>
+                        </div>     
+                        <!-- end page title --> 
+
+                        <div class="row">
+                            <div class="col-xl-4 col-lg-5">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <img src="{% static 'pictures/blankavatar.png' %}" class="rounded-circle avatar-lg img-thumbnail"
+                                        alt="profile-image">
+
+                                        <h4 class="mb-0 mt-2">{{user.first_name}} {{user.last_name}}</h4>
+                                        <div class="text-left mt-3">
+                                            <h4 class="font-13 text-uppercase">About Me :</h4>
+                                            <p class="text-muted mb-2 font-13"><strong>Full Name :</strong> <span class="ml-2">{{user.get_full_name}}</span></p>                                            
+                                            <p class="text-muted mb-2 font-13"><strong>Email :</strong> <span class="ml-2 ">{{user.email}}</span></p>
+                                            <p class="text-muted mb-2 font-13"><strong>Username :</strong> <span class="ml-2 ">{{user.get_username}}</span></p>
+                                        </div>
+                                    </div> <!-- end card-body -->
+                                </div> <!-- end card -->
+
+
+                            </div> <!-- end col-->
+
+                            
+    
+                                        </div> <!-- end tab-content -->
+                                    </div> <!-- end card body -->
+                                </div> <!-- end card -->
+                            </div> <!-- end col -->
+                        </div>
+                        <!-- end row-->
+                        
+                    </div> <!-- End Content -->
+
+                    <!-- @@include('./partials/footer.html') -->
+                    {% include "footer.html" %}
+                </div> <!-- content-page -->
+
+            </div> <!-- end wrapper-->
+        </div>
+        <!-- END Container -->
+
+
+        <!-- @@include('./partials/right-sidebar.html') -->
+        {% include "right-sidebar.html" %}
+
+        <!-- bundle -->
+        <script src="{% static 'assets/js/vendor.min.js' %}"></script>
+        <script src="{% static 'assets/js/app.min.js' %}"></script>
+        
+    </body>
+
+</html>
