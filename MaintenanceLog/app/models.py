@@ -27,3 +27,9 @@ class Maintenance(models.Model):
     notes = models.TextField(max_length=1000, null=True)
     siteCode = models.IntegerField() 
 
+class Inventory(models.Model):
+    ''' will have two different motors and two different shocks '''
+    id = models.IntegerField(primary_key=True)
+    brand = models.CharField(max_length=50, null=True)
+    modelNumber = models.CharField(max_length=50, null=True)
+    quantity = models.IntegerField(null=False)

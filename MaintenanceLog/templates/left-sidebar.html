@@ -1,0 +1,44 @@
+{% load static %}
+<!-- ========== Left Sidebar Start ========== -->
+<div class="left-side-menu">
+    
+    <div class="h-100" id="left-side-menu-container" data-simplebar>
+        <ul class="metismenu side-nav">
+            <li class="side-nav-title side-nav-item">Links</li>
+            <li class="side-nav-item">
+                <a href="{% url 'home' %}" class="side-nav-link">
+                    <i class="uil-home-alt"></i>
+                    <span>Home</span>
+                </a>
+            </li>
+            <li class="side-nav-item">
+                <a href="{% url 'update_schedule' %}" class="side-nav-link">
+                    <i class="uil-clipboard-alt"></i>
+                    <span>Update Schedule</span>
+                </a>
+            </li>
+
+            <li class="side-nav-item">
+                <a href="" class="side-nav-link">
+                    <i class="uil-calender"></i>
+                    <span> Calendar </span>
+                </a>
+            </li>
+            <li class="side-nav-item">
+                <a href="" class="side-nav-link">
+                    <i class="uil-store"></i>
+                    <span> Inventory </span>
+                    <span class="menu-arrow"></span>
+                </a>
+                <ul class="side-nav-second-level" aria-expanded="false">
+                    <li>
+                        <a href="">Products</a>
+                    </li>
+                    <li>
+                        <a href="">Products Details</a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</div>

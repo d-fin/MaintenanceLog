@@ -1,244 +1,404 @@
 {% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-   {% block content %} 
-    <!-- <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta content="A fully featured admin theme which can be used to build CRM, CMS, etc." name="description" />
-        <meta content="Coderthemes" name="author" />
-        <link rel="shortcut icon" href="{% static 'assets/images/favicon.ico' %}">
+{% block content %}
 
-        <link href="{% static 'assets/css/vendor/jquery-jvectormap-1.2.2.css' %}" rel="stylesheet" type="text/css" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    hr.rounded {
+        border-top: 8px solid #bbb;
+        border-radius: 5px;
+    }
+</style>
 
-        <link href="{% static 'assets/css/icons.min.css' %}" rel="stylesheet" type="text/css" />
-        <link href="{% static 'assets/css/app-modern.min.css' %}" rel="stylesheet" type="text/css" id="light-style" />
-        <link href="{% static 'assets/css/app-modern-dark.min.css' %}" rel="stylesheet" type="text/css" id="dark-style" />
+<body class="loading" data-layout="detached" data-layout-config='{"leftSidebarCondensed":false,"darkMode":false, "showRightSidebarOnStart": true}'>
+    
+    <!-- Start Content-->
+    <div class="container-fluid">
         
-    </head>-->
-
-    <body class="loading" data-layout="detached" data-layout-config='{"leftSidebarCondensed":false,"darkMode":false, "showRightSidebarOnStart": true}'>
-        {% include "topbar-dark.html" %}
-
-        <!-- Start Content-->
-        <div class="container-fluid">
-
-            <!-- Begin page -->
-            <div class="wrapper">
-
-                <!-- @@include('./partials/detached-left-sidebar.html') -->
-                <!-- <include src="./detached-left-sidebar.html"></include> -->
-                {% include "detached-left-sidebar.html" %}
+        <div class="wrapper">
+            <div class="row">
+                {% include "left-sidebar.html" %}  
+            </div>
+            <div class="row">
                 <div class="content-page">
+                    
                     <div class="content">
                         
-                        <!-- start page title -->
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="page-title-box">
-                                    <div class="page-title-right">
-                                        <form class="form-inline">
-                                            <div class="form-group">
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control form-control-light" id="dash-daterange">
-                                                    <div class="input-group-append">
-                                                        <span class="input-group-text bg-primary border-primary text-white">
-                                                            <i class="mdi mdi-calendar-range font-13"></i>
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
-                                        </form>
-                                    </div>
-                                    <h4 class="page-title">Dashboard</h4>
-                                </div>
-                            </div>
+                        {% if messages %}
+                        {% for message in messages %}
+                        <div class="messages {{ message.tags }}">
+                            {{ message }}
                         </div>
-                        <!-- end page title -->    
-
+                        {% endfor %}
+                        {% endif %}
+                        <br>
+                        <hr class="rounded">
+                        <br>
+                        <!-- Graph / table div -->
                         <div class="row">
-                            <div class="col-xl-5 col-lg-6">
-
-                                <div class="row">
-                                    <div class="col-lg-6">
-                                        <div class="card widget-flat">
-                                            <div class="card-body">
-                                                <a href="{% url 'add_brush' %}">
-                                                    <button type="button" class="btn btn-primary">Add Brush</button>
-                                                </a>
-                                                
-                                            </div> <!-- end card-body-->
-                                        </div> <!-- end card-->
-                                    </div> <!-- end col-->
-
-                                    <div class="col-lg-6">
-                                        <div class="card widget-flat">
-                                            <div class="card-body">
-                                                <div class="float-right">
-                                                
-                                                </div>
-                                                
-                                            </div> <!-- end card-body-->
-                                        </div> <!-- end card-->
-                                    </div> <!-- end col-->
-                                </div> <!-- end row -->
-
-                                <div class="row">
-                                    <div class="col-lg-6">
-                                        <div class="card widget-flat">
-                                            <div class="card-body">
-                                                <div class="float-right">
-                                                </div>
-                                                
-                                            </div> <!-- end card-body-->
-                                        </div> <!-- end card-->
-                                    </div> <!-- end col-->
-
-                                    <div class="col-lg-6">
-                                        <div class="card widget-flat">
-                                            <div class="card-body">
-                                                <div class="float-right">
-                                                </div>
-                                               
-                                            </div> <!-- end card-body-->
-                                        </div> <!-- end card-->
-                                    </div> <!-- end col-->
-                                </div> <!-- end row -->
-
-                            </div> <!-- end col -->
-
-                            <div class="col-xl-7  col-lg-6">
+                            <div class="col-lg-4">
                                 <div class="card">
                                     <div class="card-body">
-                                        <div class="dropdown float-right">
-                                            <a href="#" class="dropdown-toggle arrow-none card-drop" data-toggle="dropdown" aria-expanded="false">
-                                            </a>
+                                        <h4 class="header-title mb-4">Past Due %</h4>
+
+                                        <canvas id="pie-chart" width="800" height="450"></canvas>
+                                        <script>
+                                            var total = "{{ total|safe }}";
+                                            var pastDue = "{{ pastDue|safe }}";
+                                            new Chart(document.getElementById("pie-chart"), {
+                                                type: 'pie',
+                                                data: {
+                                                datasets: [{
+                                                    backgroundColor: ["#3e95cd", "#c45850"],
+                                                    data: [total, pastDue]
+                                                }]
+                                                },
+                                                
+                                            });
+                                        </script>
+                                        <div class="row text-center mt-2 py-2">
+                                            <div class="col-6">
+                                                <i class="mdi mdi-trending-up text-success mt-3 h3"></i>
+                                                <h3 class="font-weight-normal">
+                                                    <span>{{ upToDatePercent }}%</span>
+                                                </h3>
+                                                <p class="text-muted mb-0">Up to Date!</p>
+                                            </div>
                                             
+                                            <div class="col-6">
+                                                <i class="mdi mdi-trending-down text-danger mt-3 h3"></i>
+                                                <h3 class="font-weight-normal">
+                                                    <span>{{ pastDuePercent }}%</span>
+                                                </h3>
+                                                <p class="text-muted mb-0">Behind</p>
+                                            </div>
                                         </div>
-                                        
-                                        
-
-                                        <!-- <div style="height: 263px;" class="chartjs-chart">
-                                            <canvas id="high-performing-product"></canvas>
-                                        </div> -->
-                                    </div> <!-- end card-body-->
-                                </div> <!-- end card-->
-
-                            </div> <!-- end col -->
-                        </div>
-                        <!-- end row -->
-
-                        <div class="row">
+                                    </div> 
+                                </div> 
+                            </div>
                             <div class="col-lg-8">
                                 <div class="card">
                                     <div class="card-body">
                                         <div class="dropdown float-right">
-                                            <a href="#" class="dropdown-toggle arrow-none card-drop" data-toggle="dropdown" aria-expanded="false">
+                                            <a href="#" class="dropdown-toggle arrow-none card-drop"
+                                                data-toggle="dropdown" aria-expanded="false">
                                                 <i class="mdi mdi-dots-vertical"></i>
                                             </a>
                                             <div class="dropdown-menu dropdown-menu-right">
-                                               
+                                                <!-- item-->
+                                                <a href="javascript:void(0);" class="dropdown-item">Weekly Report</a>
+                                                <!-- item-->
+                                                <a href="javascript:void(0);" class="dropdown-item">Monthly Report</a>
                                             </div>
                                         </div>
+                                        <h4 class="header-title mb-3">Tasks</h4>
 
-                                        <div class="chart-content-bg">
-                                            <div class="row text-center">
-                                                <div class="col-md-6">
-                                                   
-                                                </div>
-                                                <div class="col-md-6">
-                                                    
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <p><b>107</b> Tasks completed out of 195</p>
 
-                                        <div class="dash-item-overlay d-none d-md-block">
-                                            
-                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="table table-centered table-nowrap table-hover mb-0">
+                                                <tbody>
+                                                    <tr>
+                                                        <td>
+                                                            <h5 class="font-14 my-1"><a href="javascript:void(0);"
+                                                                    class="text-body">Coffee detail page - Main Page</a>
+                                                            </h5>
+                                                            <span class="text-muted font-13">Due in 3 days</span>
+                                                        </td>
+                                                        <td>
+                                                            <span class="text-muted font-13">Status</span> <br />
+                                                            <span class="badge badge-warning-lighten">In-progress</span>
+                                                        </td>
+                                                        <td>
+                                                            <span class="text-muted font-13">Assigned to</span>
+                                                            <h5 class="font-14 mt-1 font-weight-normal">Logan R. Cohn
+                                                            </h5>
+                                                        </td>
+                                                        <td>
+                                                            <span class="text-muted font-13">Total time spend</span>
+                                                            <h5 class="font-14 mt-1 font-weight-normal">3h 20min</h5>
+                                                        </td>
+                                                        <td class="table-action" style="width: 90px;">
+                                                            <a href="javascript: void(0);" class="action-icon"> <i
+                                                                    class="mdi mdi-pencil"></i></a>
+                                                            <a href="javascript: void(0);" class="action-icon"> <i
+                                                                    class="mdi mdi-delete"></i></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>
+                                                            <h5 class="font-14 my-1"><a href="javascript:void(0);"
+                                                                    class="text-body">Drinking bottle graphics</a></h5>
+                                                            <span class="text-muted font-13">Due in 27 days</span>
+                                                        </td>
+                                                        <td>
+                                                            <span class="text-muted font-13">Status</span> <br />
+                                                            <span class="badge badge-danger-lighten">Outdated</span>
+                                                        </td>
+                                                        <td>
+                                                            <span class="text-muted font-13">Assigned to</span>
+                                                            <h5 class="font-14 mt-1 font-weight-normal">Jerry F. Powell
+                                                            </h5>
+                                                        </td>
+                                                        <td>
+                                                            <span class="text-muted font-13">Total time spend</span>
+                                                            <h5 class="font-14 mt-1 font-weight-normal">12h 21min</h5>
+                                                        </td>
+                                                        <td class="table-action" style="width: 90px;">
+                                                            <a href="javascript: void(0);" class="action-icon"> <i
+                                                                    class="mdi mdi-pencil"></i></a>
+                                                            <a href="javascript: void(0);" class="action-icon"> <i
+                                                                    class="mdi mdi-delete"></i></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>
+                                                            <h5 class="font-14 my-1"><a href="javascript:void(0);"
+                                                                    class="text-body">App
+                                                                    design and development</a></h5>
+                                                            <span class="text-muted font-13">Due in 7 days</span>
+                                                        </td>
+                                                        <td>
+                                                            <span class="text-muted font-13">Status</span> <br />
+                                                            <span class="badge badge-success-lighten">Completed</span>
+                                                        </td>
+                                                        <td>
+                                                            <span class="text-muted font-13">Assigned to</span>
+                                                            <h5 class="font-14 mt-1 font-weight-normal">Scot M. Smith
+                                                            </h5>
+                                                        </td>
+                                                        <td>
+                                                            <span class="text-muted font-13">Total time spend</span>
+                                                            <h5 class="font-14 mt-1 font-weight-normal">78h 05min</h5>
+                                                        </td>
+                                                        <td class="table-action" style="width: 90px;">
+                                                            <a href="javascript: void(0);" class="action-icon"> <i
+                                                                    class="mdi mdi-pencil"></i></a>
+                                                            <a href="javascript: void(0);" class="action-icon"> <i
+                                                                    class="mdi mdi-delete"></i></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>
+                                                            <h5 class="font-14 my-1"><a href="javascript:void(0);"
+                                                                    class="text-body">Poster illustation design</a></h5>
+                                                            <span class="text-muted font-13">Due in 5 days</span>
+                                                        </td>
+                                                        <td>
+                                                            <span class="text-muted font-13">Status</span> <br />
+                                                            <span class="badge badge-warning-lighten">In-progress</span>
+                                                        </td>
+                                                        <td>
+                                                            <span class="text-muted font-13">Assigned to</span>
+                                                            <h5 class="font-14 mt-1 font-weight-normal">John P. Ritter
+                                                            </h5>
+                                                        </td>
+                                                        <td>
+                                                            <span class="text-muted font-13">Total time spend</span>
+                                                            <h5 class="font-14 mt-1 font-weight-normal">26h 58min</h5>
+                                                        </td>
+                                                        <td class="table-action" style="width: 90px;">
+                                                            <a href="javascript: void(0);" class="action-icon"> <i
+                                                                    class="mdi mdi-pencil"></i></a>
+                                                            <a href="javascript: void(0);" class="action-icon"> <i
+                                                                    class="mdi mdi-delete"></i></a>
+                                                        </td>
+                                                    </tr>
 
-                                        
-                                    </div> <!-- end card-body-->
-                                </div> <!-- end card-->
-                            </div> <!-- end col-->
+                                                </tbody>
+                                            </table>
+                                        </div> <!-- end table-responsive-->
 
-                            <div class="col-lg-4">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <div class="dropdown float-right">
-                                            <a href="#" class="dropdown-toggle arrow-none card-drop" data-toggle="dropdown" aria-expanded="false">
-                                                <i class="mdi mdi-dots-vertical"></i>
-                                            </a>
-                                            <div class="dropdown-menu dropdown-menu-right">
-                                               
-                                            </div>
-                                        </div>
-                                        
-                                    </div> <!-- end card-body-->
-                                </div> <!-- end card-->
-                            </div> <!-- end col-->
+                                    </div> <!-- end card body-->
+                                </div> <!-- end card -->
+                            </div><!-- end col-->
                         </div>
-                        <!-- end row -->
+                        <!-- end row-->
 
-
+                        <!-- table divs -->
                         <div class="row">
-                            <div class="col-xl-6 col-lg-12 order-lg-2 order-xl-1">
-                                <div class="card">
-                                    <div class="card-body">
-                                        
-                                    </div> <!-- end card-body-->
-                                </div> <!-- end card-->
-                            </div> <!-- end col-->
-
-                            <div class="col-xl-3 col-lg-6 order-lg-1">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <div class="dropdown float-right">
-                                            
-                                        </div>
-                                        
-                                        
-                                    </div> <!-- end card-body-->
-                                </div> <!-- end card-->
-                            </div> <!-- end col-->
-
-                            <div class="col-xl-3 col-lg-6 order-lg-1">
-                                <div class="card">
-                                    <div class="card-body">
-                                    </div><!-- end card-body -->
-                                </div> <!-- end card-->
-                                <!-- end col -->
+                            <div class="col-12">
+                                {% if df %}
+                                <hr class="rounded">
+                                <h4>Miscellaneous</h4>
+                                
+                                <table class="table table-centered mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Part</th>
+                                            <th>Date Replaced</th>
+                                            <th>Due Date</th>
+                                            <th>Notes</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for i in df %}
+                                        <tr>
+                                            <td>{{ i.1 }}</td>
+                                            <td>{{ i.2 }}</td>
+                                            <td>{{ i.3 }}</td>
+                                            <td>{{ i.4 }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                {% endif %}
+                                <hr class="rounded">
+                                {% if curtains %}
+                                <h4>Curtains</h4>
+                                <table class="table table-centered mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Set Number</th>
+                                            <th>Motor</th>
+                                            <th>Cloth</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for j in curtains %}
+                                        {% for h in j %}
+                                        {% for i in h %}
+                                        <tr>
+                                            <td>{{ i.setNum }}</td>
+                                            <td>{{ i.motor }}</td>
+                                            <td>{{ i.cloth }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                        {% endfor %}
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                {% endif %}
+                                <hr class="rounded">
+                                {% if rockers %}
+                                <h4>Rockers</h4>
+                                <table class="table table-centered mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Side</th>
+                                            <th>Set Number</th>
+                                            <th>Motor</th>
+                                            <th>Bearings</th>
+                                            <th>Cloth</th>
+                                            <th>Shocks</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for j in rockers %}
+                                        {% for h in j %}
+                                        {% for i in h %}
+                                        <tr>
+                                            <td>{{ i.side }}</td>
+                                            <td>{{ i.setNum }}</td>
+                                            <td>{{ i.motor }}</td>
+                                            <td>{{ i.bearings }}</td>
+                                            <td>{{ i.cloth }}</td>
+                                            <td>{{ i.shocks }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                        {% endfor %}
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                {% endif %}
+                        
+                                <hr class="rounded">
+                                {% if wraps %}
+                                <table class="table table-centered mb-0">
+                                    <h4>Wrap Brushes</h4>
+                                    <thead>
+                                        <tr>
+                                            <th>Side</th>
+                                            <th>Set Number</th>
+                                            <th>Motor</th>
+                                            <th>Shaft</th>
+                                            <th>Bearings</th>
+                                            <th>Upper Bearings</th>
+                                            <th>Cloth</th>
+                                            <th>Shocks</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for j in wraps %}
+                                        {% for h in j %}
+                                        {% for i in h %}
+                                        <tr>
+                                            <td>{{ i.side }}</td>
+                                            <td>{{ i.setNum }}</td>
+                                            <td>{{ i.motor }}</td>
+                                            <td>{{ i.shaft }}</td>
+                                            <td>{{ i.bearings }}</td>
+                                            <td>{{ i.upperBearings }}</td>
+                                            <td>{{ i.cloth }}</td>
+                                            <td>{{ i.shocks }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                        {% endfor %}
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                {% endif %}
+                                <hr class="rounded">
+                                {% if sideWashers %}
+                                <table class="table table-centered mb-0">
+                                    <h4>Side Washers</h4>
+                                    <thead>
+                                        <tr>
+                                            <th>Side</th>
+                                            <th>Set Number</th>
+                                            <th>Motor</th>
+                                            <th>Shaft</th>
+                                            <th>Bearings</th>
+                                            <th>Upper Bearings</th>
+                                            <th>Cloth</th>
+                                            <th>Shocks</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for j in sideWashers %}
+                                        {% for h in j %}
+                                        {% for i in h %}
+                                        <tr>
+                                            <td>{{ i.side }}</td>
+                                            <td>{{ i.setNum }}</td>
+                                            <td>{{ i.motor }}</td>
+                                            <td>{{ i.shaft }}</td>
+                                            <td>{{ i.bearings }}</td>
+                                            <td>{{ i.upperBearings }}</td>
+                                            <td>{{ i.cloth }}</td>
+                                            <td>{{ i.shocks }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                        {% endfor %}
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                <hr class="rounded">
+                                {% endif %}
                             </div>
-                            <!-- end row -->
-                    </div> <!-- End Content -->
-
-                    <!-- @@include('./partials/footer.html') -->
-                    {% include "footer.html" %}
-                </div> <!-- content-page -->
-
-            </div> <!-- end wrapper-->
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
         </div>
-        <!-- END Container -->
+    </div>
 
 
-        <!-- @@include('./partials/right-sidebar.html') -->
-        {% include "right-sidebar.html" %}
+    
+    {% include "right-sidebar.html" %}
 
-        <!-- bundle -->
-        <script src="{% static 'assets/js/vendor.min.js' %}"></script>
-        <script src="{% static 'assets/js/app.min.js' %}"></script>
+    <script src="{% static 'assets/js/vendor.min.js' %}"></script>
+    <script src="{% static 'assets/js/app.min.js' %}"></script>
 
-        <!-- third party js -->
-        <script src="{% static 'assets/js/vendor/apexcharts.min.js' %}"></script>
-        <script src="{% static 'assets/js/vendor/jquery-jvectormap-1.2.2.min.js' %}"></script>
-        <script src="{% static 'assets/js/vendor/jquery-jvectormap-world-mill-en.js' %}"></script>
-        <!-- third party js ends -->
+    <script src="{% static 'assets/js/vendor/apexcharts.min.js' %}"></script>
+    <script src="{% static 'assets/js/vendor/jquery-jvectormap-1.2.2.min.js' %}"></script>
+    <script src="{% static 'assets/js/vendor/jquery-jvectormap-world-mill-en.js' %}"></script>
 
-        <!-- demo app -->
-        <script src="{% static 'assets/js/pages/demo.dashboard.js' %}"></script>
-        <!-- end demo js-->
-        
-    </body>
-    {% endblock content %}
-</html>
+    <!-- <script src="{% static 'assets/js/pages/demo.dashboard.js' %}"></script> -->
+
+</body>
+
+
+{% endblock content %}
+

@@ -1,35 +1,109 @@
-import email
+from email.message import Message
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
 from django.db import connection
 from django.contrib.auth.admin import * 
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
-
 from django.contrib.auth import authenticate, login, logout 
-from .forms import CreateUserForm, DropdownMenuForm
+from .forms import CreateUserForm, DropdownMenuForm, updateCompValueForm
+from django.contrib.auth.decorators import login_required
 import pdb
+from datetime import date
+from dateutil import parser
+import numpy as np 
+
+from app.functions import *
 # Create your views here.
 
 #home page 
+@login_required
 def home(request):
+
     siteCode = 1
-    maintenanceData = {}
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT * FROM app_maintenance WHERE siteCode = " + str(siteCode))
-        for i in cursor: 
-            x = 0
-            temp = []
-            for j in i:
-                if x == 0: pass 
-                else: temp.append(j)
-                x += 1
-            maintenanceData[temp[0]] = temp
+    maintenanceData = getMaintenanceData(siteCode)
+    brushData = getBrushData(siteCode)
+
+    curtains = [brushData['Curtains']]
+    wraps = [brushData['Wrap Brushes']]
+    sideWashers = [brushData['Side Washers']]
+    rockers = [brushData['Rocker Brushes']]
+
+    
+    df = returnDataFrames()
+    df1 = df.values.tolist()
+    today = datetime.date.today().strftime("%m/%d/%Y")
+    total, pastDay = 0, 0
+    for i in df1:
+        for j in i:
+            if isinstance(j, datetime.date) == True:
+                j = j.strftime("%m/%d/%Y")
+                if j < today: 
+                    pastDay += 1
+                    total += 1
+                else: total += 1
+
+    allGood = total - pastDay
+    pastDuePercent = round(((pastDay / total) * 100), 2)
+    upToDatePercent = round((100 - pastDuePercent), 2)
+   
+    context = {
+        'df' : maintenanceData,
+        'curtains' : curtains,
+        'wraps' : wraps,
+        'sideWashers' : sideWashers,
+        'rockers' : rockers,
+        'total' : allGood,
+        'pastDue' : pastDay,
+        'pastDuePercent' : pastDuePercent,
+        'upToDatePercent' : upToDatePercent,
+    }
+
+    return render(request, 'index.html', context)
+
+@login_required
+def updateSchedule(request):
+    choices =  [(1, 'Curtain'), (2, 'Rocker Brush'),
+         (3, 'Wrap Brush'), (4, 'Side Washer'),
+         (5, 'Takeup Drum'), (6, 'Sprocket'),
+         (7, 'Fork Cover'), (8, 'Fork Cylinder'),
+         (9, 'Heco Drive'), (10, 'Conveyor Hydraulic Motor'),
+         (11, 'Chain/Rollers')]
+
+    brushesStrings =  ['Curtain', 'Rocker Brush', 'Wrap Brush', 'Side Washer']
+    otherCompStrings = ['Takeup Drum', 'Sprocket', 'Fork Cover', 'Fork Cylinder',
+        'Heco Drive', 'Conveyor Hydraulic Motor', 'Chain/Rollers']
+    
+    brushes, headersBrushes, component, headersComp, compData = None, None, None, None, None
+    formSelect = updateCompValueForm()
+
+    if request.method == 'POST':
+        comp = None
+        formSelect = updateCompValueForm(request.POST)
+        if formSelect.is_valid():
+            data = formSelect.cleaned_data.get('component')
+            if int(data) == 0:
+                return redirect('update_schedule')
+            else:
+                for i in choices: 
+                    if int(data) == int(i[0]):
+                        comp = i[1]
+        component = comp
+
+        if comp in brushesStrings:
+            headersBrushes, brushes = getSpecificCompData(comp)
+        elif comp in otherCompStrings:
+            headersComp, compData = getSpecificCompData(comp)
+        
 
     context = {
-
+        'formSelect' : formSelect,
+        'component' : component,
+        'headers' : headersBrushes,
+        'brushes' : brushes,
+        'headersComp' : headersComp,
+        'compData' : compData,
     }
-    return render(request, 'index.html')
+    return render(request, 'update_schedule.html', context)
 
 def addBrush(request):
     form = DropdownMenuForm()
@@ -37,8 +111,6 @@ def addBrush(request):
         form = DropdownMenuForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data.get('brushType')
-            """ with connection.cursor() as cursor:
-                cursor.execute() """
             return redirect('home')
 
     context = {
@@ -86,3 +158,69 @@ def logoutUser(request):
 
 def userAccount(request):
     return render(request, 'profile.html')
+
+#---------------------------------------
+# Below are my ajax/jsom parsers that recieve data from my table in "Update Schedule"
+def getUpdate_SchedulePage():
+    return 
+
+def saveSchedule(request):
+    id = request.POST.get('id', '')
+    value = request.POST.get('value', '')
+    type = request.POST.get("type", '')
+    
+    dateString, day, month, year = None, None, None, None
+    if type == "name" or type == "notes2":
+        pass 
+    else:
+        try: 
+            data = value.split("/")
+            month = data[0]
+            day = data[1] 
+            year = data[2] 
+        except Exception as e: 
+            print(e)
+            dateString = value
+        else: dateString = year + "/" + month + "/" + day
+        finally: 
+            value = parser.parse(dateString)
+
+    
+    if type == "name" or type == "dateReplaced" or type == "dueDate" or type == "notes2":
+        compData = Maintenance.objects.get(id=id)
+        if type == "name":
+            compData.component = value 
+        if type == "dateReplaced":
+            compData.dateReplaced = value 
+        if type == "dueDate":
+            compData.dueDate = value 
+        if type == "notes2":
+            compData.notes = value 
+        compData.save()
+
+    else:
+        brushComp = BrushComponent.objects.get(brushID=id)
+        brushData = Brush.objects.get(id=id)
+        if type == "side":
+            brushData.side = value
+        if type == "setNum":
+            brushData.setNum = value
+        if type == "motor":
+            brushComp.motor = value
+        if type == "shaft":
+            brushComp.shaft = value
+        if type == "bearings":
+            brushComp.bearings = value
+        if type == "upperBearings":
+            brushComp.upperBearings = value
+        if type == "cloth":
+            brushComp.cloth = value
+        if type == "shocks":
+            brushComp.shocks = value 
+
+        if type == "side" or type == "setNum":
+            brushData.save()
+        else:
+            brushComp.save()
+
+    return JsonResponse({"success" : "Updated"})
