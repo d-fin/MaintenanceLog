@@ -15,9 +15,8 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 import pymysql 
 pymysql.install_as_MySQLdb() 
 from pathlib import Path
+from decouple import config
 
-from dotenv import load_dotenv
-load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,8 +26,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ulw8#!8*su8j_h3@!a^=$b*qf^v1_i^o*m*tinruyz3-q%af!4'
-DEBUG=True
+SECRET_KEY = config('SECRET_KEY')
+#= 'django-insecure-ulw8#!8*su8j_h3@!a^=$b*qf^v1_i^o*m*tinruyz3-q%af!4'
+DEBUG =  config('DEBUG', cast=bool)
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -49,7 +49,6 @@ INSTALLED_APPS = [
     'app',
     'bootstrap4',
     'chartjs',
-    'python-decouple',
 ]
 
 MIDDLEWARE = [
