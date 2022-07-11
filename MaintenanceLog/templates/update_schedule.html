@@ -54,7 +54,11 @@
                             </table>
                             {% endif %}
                             {% if compData %}
+                            {% if component2 %}
+                            <h4>{{ component2 }}</h4>
+                            {% else %}
                             <h4>{{ component }}</h4>
+                            {% endif %}
                             <h5>Dates shown are the dates of last update. (This table cannot be edited) </h5>
                             <table class="table table-centered mb-0">
                                 <thead>
@@ -107,7 +111,11 @@
                             </table>
                             {% endif %}
                             {% if compData %}
+                            {% if component2 %}
+                            <h4>{{ component2 }}</h4>
+                            {% else %}
                             <h4>{{ component }}</h4>
+                            {% endif %}
                             <h5>Make updates in table below - click on table where you want to update the date.</h5>
                             <table class="table table-centered mb-0">
                                 <thead>

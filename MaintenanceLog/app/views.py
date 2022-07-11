@@ -45,7 +45,8 @@ def home(request):
     allGood = total - pastDay
     pastDuePercent = round(((pastDay / total) * 100), 2)
     upToDatePercent = round((100 - pastDuePercent), 2)
-   
+    
+
     context = {
         'df' : maintenanceData,
         'curtains' : curtains,
@@ -62,18 +63,18 @@ def home(request):
 
 @login_required
 def updateSchedule(request):
-    choices =  [(1, 'Curtain'), (2, 'Rocker Brush'),
-         (3, 'Wrap Brush'), (4, 'Side Washer'),
+    choices =  [(0, 'Select'), (1, 'Curtain'), (2, 'Rocker Brush'),
+         (3, 'Wrap Brush'), (4, 'Side Brush'),
          (5, 'Takeup Drum'), (6, 'Sprocket'),
          (7, 'Fork Cover'), (8, 'Fork Cylinder'),
          (9, 'Heco Drive'), (10, 'Conveyor Hydraulic Motor'),
-         (11, 'Chain/Rollers')]
+         (11, 'Chain/Rollers'), (12, "All Brushes"), (13, "All Components")]
 
     brushesStrings =  ['Curtain', 'Rocker Brush', 'Wrap Brush', 'Side Washer']
     otherCompStrings = ['Takeup Drum', 'Sprocket', 'Fork Cover', 'Fork Cylinder',
         'Heco Drive', 'Conveyor Hydraulic Motor', 'Chain/Rollers']
     
-    brushes, headersBrushes, component, headersComp, compData = None, None, None, None, None
+    brushes, headersBrushes, component, component2, headersComp, compData = None, None, None, None, None, None
     formSelect = updateCompValueForm()
 
     if request.method == 'POST':
@@ -83,21 +84,49 @@ def updateSchedule(request):
             data = formSelect.cleaned_data.get('component')
             if int(data) == 0:
                 return redirect('update_schedule')
+            elif int(data) == 12:
+                z = []
+                brushes = []
+                for i in brushesStrings:
+                    headersBrushes, temp = getSpecificCompData(i)
+                    z.append(temp)
+                for j in z:
+                    for x in j:
+                        brushes.append(x)
+            elif int(data) == 13:
+                z = []
+                brushes = []
+                for i in brushesStrings:
+                    headersBrushes, temp = getSpecificCompData(i)
+                    z.append(temp)
+                for j in z:
+                    for x in j:
+                        brushes.append(x)
+                a = []
+                compData = []       
+                for i in otherCompStrings:
+                    headersComp, temp = getSpecificCompData(i)
+                    a.append(temp)
+                for j in a:
+                    for x in j:
+                        compData.append(x)
             else:
                 for i in choices: 
                     if int(data) == int(i[0]):
                         comp = i[1]
-        component = comp
+                component = comp
 
-        if comp in brushesStrings:
-            headersBrushes, brushes = getSpecificCompData(comp)
-        elif comp in otherCompStrings:
-            headersComp, compData = getSpecificCompData(comp)
-        
-
+                if comp in brushesStrings:
+                    headersBrushes, brushes = getSpecificCompData(comp)
+                elif comp in otherCompStrings:
+                    headersComp, compData = getSpecificCompData(comp)
+            if int(data) == 13:
+                component = "All Brushes"
+                component2 = "All Components"        
     context = {
         'formSelect' : formSelect,
         'component' : component,
+        'component2' : component2,
         'headers' : headersBrushes,
         'brushes' : brushes,
         'headersComp' : headersComp,

@@ -55,7 +55,7 @@ def getSpecificCompData(comp):
             temp = getSpecificComponentData(i)
             z.append(temp)
         compData = pd.concat(z) """
-        comp = dataDict[comp]
+        #comp = dataDict[comp]
         compData = pd.DataFrame(list(Maintenance.objects.all().values().filter(component = comp)))
         compData = compData.drop(compData.columns[[5]], axis=1)
         compData = compData.values.tolist()

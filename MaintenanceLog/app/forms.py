@@ -17,6 +17,6 @@ class updateCompValueForm(forms.Form):
          (5, 'Takeup Drum'), (6, 'Sprocket'),
          (7, 'Fork Cover'), (8, 'Fork Cylinder'),
          (9, 'Heco Drive'), (10, 'Conveyor Hydraulic Motor'),
-         (11, 'Chain/Rollers')], widget=forms.Select(
+         (11, 'Chain/Rollers'), (12, "All Brushes"), (13, "All Components")], widget=forms.Select(
              attrs={'class' : 'dropdownMenu'}
          ))
