@@ -1,8 +1,30 @@
-{% extends 'base.html' %}
 {% load static %}
 {% block content %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="" name="description" />
+    <meta content="" name="author" />
+    <!-- App favicon -->
+    <link rel="shortcut icon" href="{% static 'pictures/favicon.ico' %}">
+
+    <!-- third party css -->
+    <link href="{% static 'assets/css/vendor/jquery-jvectormap-1.2.2.css' %}" rel="stylesheet" type="text/css" />
+    <!-- third party css end -->
+
+    <!-- App css -->
+    <link href="{% static 'assets/css/icons.min.css' %}" rel="stylesheet" type="text/css" />
+    <link href="{% static 'assets/css/app-modern-dark.min.css' %}" rel="stylesheet" type="text/css" id="dark-style" />
+    <link href="{% static 'assets/css/app-modern.min.css' %}" rel="stylesheet" type="text/css" id="light-style" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.2.1/dist/Chart.min.js"></script>
+</head>
 
 <body class="content">
+    {% include 'topbar-dark.html' %}
+    <br>
     <div class="bodyDiv">
         <div class="row">
             <div class="col-lg-4"></div>
@@ -30,14 +52,16 @@
                             </div>
                         </div>
                         <div class="form-group mb-0 text-center">
-                            <button class="btn btn-primary btn-block" type="submit"><i class="mdi mdi-login"></i>Log In</button>
+                            <button class="btn btn-primary btn-block" type="submit"><i class="mdi mdi-login"></i>Log
+                                In</button>
                         </div>
                     </form>
                 </div>
-                
+
                 <br><br>
                 <div class="d-flex justify-content-center">
-                    <p class="text-muted">Don't have an account? <a href="{% url 'register' %}" class="text-muted ml-1"><b>Sign Up</b></a></p>
+                    <p class="text-muted">Don't have an account? <a href="{% url 'register' %}"
+                            class="text-muted ml-1"><b>Sign Up</b></a></p>
                 </div>
             </div>
             <div class="col-lg-4"></div>
@@ -45,31 +69,12 @@
     </div>
 </body>
 
+</html>
 {% endblock content %}
 
-<!-- <style>
+<!-- <script src="{% static 'assets/js/vendor.min.js' %}"></script>
+<script src="{% static 'assets/js/app.min.js' %}"></script> -->
 
-    .footerDiv {
-        float: center;
-    }
-
-    .bodyDiv {
-        height: 200px;
-        width: 200px;
-    }
-
-    .formDiv {
-        height: 100px;
-        width: 100px;
-    }
-
-    .imageDiv {
-        height: 100px;
-        width: 100px;
-    }
-
-    .pictureWash {
-        height: 200px;
-        width: 200px;
-    }
-</style> -->
+<!-- <script src="{% static 'assets/js/vendor/apexcharts.min.js' %}"></script>
+<script src="{% static 'assets/js/vendor/jquery-jvectormap-1.2.2.min.js' %}"></script>
+<script src="{% static 'assets/js/vendor/jquery-jvectormap-world-mill-en.js' %}"></script>  -->

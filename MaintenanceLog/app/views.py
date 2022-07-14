@@ -19,8 +19,8 @@ from app.functions import *
 # Create your views here.
 
 
-#home page 
-@login_required
+#home page
+@login_required 
 def home(request):
     changeSite = request.GET.get('id','')
 
@@ -234,6 +234,7 @@ def logoutUser(request):
     logout(request)
     return redirect('home')
 
+# user account
 def userAccount(request):
     currentUser = request.user
     id = currentUser.id
