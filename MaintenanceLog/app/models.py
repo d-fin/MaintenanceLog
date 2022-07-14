@@ -1,6 +1,14 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
+class Employee(models.Model):
+    user = models.OneToOneField(User,
+        related_name='employee',
+        on_delete=models.CASCADE)
+    site = models.IntegerField(default=1)
+    darkMode = models.BooleanField(default=False)
+
 class Brush(models.Model):
     id = models.IntegerField(primary_key=True)
     side = models.CharField(max_length=1)
@@ -28,8 +36,8 @@ class Maintenance(models.Model):
     siteCode = models.IntegerField() 
 
 class Inventory(models.Model):
-    ''' will have two different motors and two different shocks '''
     id = models.IntegerField(primary_key=True)
-    brand = models.CharField(max_length=50, null=True)
+    partName = models.CharField(max_length=50, null=True)
     modelNumber = models.CharField(max_length=50, null=True)
     quantity = models.IntegerField(null=False)
+    siteCode = models.IntegerField() 

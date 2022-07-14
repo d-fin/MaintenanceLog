@@ -11,4 +11,8 @@ urlpatterns = [
     path('update_schedule', views.updateSchedule, name='update_schedule'),
     path('getUpdate_SchedulePage', views.getUpdate_SchedulePage, name="getUpdate_SchedulePage"),
     path('saveSchedule', views.saveSchedule, name="saveSchedule"),
+    path('update_inventory', views.update_inventory, name="update_inventory"),
+    path('inventory_details', views.inventory_details, name='inventory_details'),
+    path('saveInventory', views.saveInventory, name='saveInventory'),
+    path('edit_profile', views.edit_profile, name='edit_profile'),
 ]

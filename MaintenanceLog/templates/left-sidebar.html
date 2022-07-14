@@ -24,20 +24,18 @@
                     <span> Calendar </span>
                 </a>
             </li>
+            
             <li class="side-nav-item">
-                <a href="" class="side-nav-link">
+                <a href="{% url 'update_inventory' %}" class="side-nav-link">
                     <i class="uil-store"></i>
-                    <span> Inventory </span>
-                    <span class="menu-arrow"></span>
+                    <span>Update Inventory</span>
                 </a>
-                <ul class="side-nav-second-level" aria-expanded="false">
-                    <li>
-                        <a href="">Products</a>
-                    </li>
-                    <li>
-                        <a href="">Products Details</a>
-                    </li>
-                </ul>
+            </li>
+            <li class="side-nav-item">
+                <a href="{% url 'inventory_details' %}" class="side-nav-link">
+                    <i class="uil-briefcase"></i>
+                    <span>Inventory Details</span>
+                </a>
             </li>
         </ul>
     </div>

@@ -5,31 +5,21 @@ import datetime
 from .models import * 
 from dateutil.relativedelta import relativedelta
 
-def getSpecificCompData(comp):
+def getSpecificCompData(comp, siteCode):
     brushes =  ['Curtain', 'Rocker Brush', 'Wrap Brush', 'Side Washer']
     otherComp = ['Takeup Drum', 'Sprocket', 'Fork Cover', 'Fork Cylinder',
         'Heco Drive', 'Conveyor Hydraulic Motor', 'Chain/Rollers']
     
-    dataDict = {
-        "TakeUp Drum" : "drum",
-        "Sprocket" : "sprocket",
-        "Fork Cover" : "forkCover",
-        "Fork Cylinder" : "forkCylinder",
-        "Heco Drive" : "hecoDrive",
-        "Conveyor Hydraulic Motor" : "convHydMotor",
-        "Chain/Rollers" : "chainRollers"
-    }
-
     brushData, brushComponents, compData, headers = None, None, None, None
 
     if comp in brushes: 
-        brushData = getSpecificBrushData(comp)
+        brushData = getSpecificBrushData(comp, siteCode)
         ids = brushData['id'].to_list()
         brushComponents = pd.DataFrame(columns=['id', 'brushID', 'motor', 'shaft', 'bearings', 'upperBearings', 'cloth', 'siteCode'])
         
         z = []
         for i in ids:
-            temp = getSpecificComponentData(i)
+            temp = getSpecificComponentData(i, siteCode)
             z.append(temp)
         brushData = brushData.drop(brushData.columns[[3, 4]], axis=1)
         brushComponents = brushComponents.drop(brushComponents.columns[[1, 2]], axis=1)    
@@ -48,14 +38,6 @@ def getSpecificCompData(comp):
     
     if comp in otherComp:
         headers = ["Part", "Date Replaced", "Due Date", "Notes"]
-        """ ids = [1, 2, 3, 4, 5, 6, 7]
-        compData = pd.DataFrame(columns=["id", "component", "dateReplaced", "dueDate", "notes", "siteCode"])
-        z = []
-        for i in ids:
-            temp = getSpecificComponentData(i)
-            z.append(temp)
-        compData = pd.concat(z) """
-        #comp = dataDict[comp]
         compData = pd.DataFrame(list(Maintenance.objects.all().values().filter(component = comp)))
         compData = compData.drop(compData.columns[[5]], axis=1)
         compData = compData.values.tolist()
@@ -67,30 +49,171 @@ def getSpecificCompData(comp):
 
         return headers, compData 
 
+def getTasks(siteCode):
+    brushDf = returnDataFrames(siteCode)
+    brushDfList = brushDf.values.tolist()
+
+    compDf = returnComponentDataFrames(siteCode)
+    compDf = compDf.values.tolist()
+
+    behindDf = pd.DataFrame(columns=["side", "setNum", "brushStyle", "dateReplaced", "component"])
+    upcomingDf = pd.DataFrame(columns=["side", "setNum", "brushStyle", "dateReplaced", "component"])
+    behind = []
+    upcoming = []
+
+    today = datetime.date.today()
+    thirtyDaysOut = today + relativedelta(days=30)
+    thirtyDaysOut = returnDate(thirtyDaysOut)
+    today = returnDate(today)
+
+    for i in brushDfList:
+        k = 0
+        for j in i:
+            temp = []
+            upcomingTemp = []
+            dontPutInBoth = False
+            if isinstance(j, datetime.date) == True:
+                j = j.strftime("%m/%d/%Y")
+                if j < today: 
+                    dontPutInBoth = True
+                    if k == 4:
+                        temp.append(i[1])
+                        temp.append(i[2])
+                        temp.append(i[3])
+                        temp.append(i[4])
+                        temp.append("Motor")
+                        behind.append(temp)
+                    if k == 5:
+                        temp.append(i[1])
+                        temp.append(i[2])
+                        temp.append(i[3])
+                        temp.append(i[5])
+                        temp.append("Shaft")
+                        behind.append(temp)
+                    if k == 6:
+                        temp.append(i[1])
+                        temp.append(i[2])
+                        temp.append(i[3])
+                        temp.append(i[6])
+                        temp.append("Bearings")
+                        behind.append(temp)
+                    if k == 7:
+                        temp.append(i[1])
+                        temp.append(i[2])
+                        temp.append(i[3])
+                        temp.append(i[7])
+                        temp.append("Upper Bearings")
+                        behind.append(temp)
+                    if k == 8:
+                        temp.append(i[1])
+                        temp.append(i[2])
+                        temp.append(i[3])
+                        temp.append(i[8])
+                        temp.append("CLoth")
+                        behind.append(temp)
+                    if k == 9:
+                        temp.append(i[1])
+                        temp.append(i[2])
+                        temp.append(i[3])
+                        temp.append(i[9])
+                        temp.append("Shocks")
+                        behind.append(temp)
+                    if len(temp) == 0: pass 
+                    else: behindDf.loc[len(behindDf)] = temp
+                if j > today and j <= thirtyDaysOut and dontPutInBoth == False:
+                    if k == 4:
+                        upcomingTemp.append(i[1])
+                        upcomingTemp.append(i[2])
+                        upcomingTemp.append(i[3])
+                        upcomingTemp.append(i[4])
+                        upcomingTemp.append("Motor")
+                        upcoming.append(temp)
+                    if k == 5:
+                        upcomingTemp.append(i[1])
+                        upcomingTemp.append(i[2])
+                        upcomingTemp.append(i[3])
+                        upcomingTemp.append(i[5])
+                        upcomingTemp.append("Shaft")
+                        upcoming.append(temp)
+                    if k == 6:
+                        upcomingTemp.append(i[1])
+                        upcomingTemp.append(i[2])
+                        upcomingTemp.append(i[3])
+                        upcomingTemp.append(i[6])
+                        upcomingTemp.append("Bearings")
+                        upcoming.append(temp)
+                    if k == 7:
+                        upcomingTemp.append(i[1])
+                        upcomingTemp.append(i[2])
+                        upcomingTemp.append(i[3])
+                        upcomingTemp.append(i[7])
+                        upcomingTemp.append("Upper Bearings")
+                        upcoming.append(temp)
+                    if k == 8:
+                        upcomingTemp.append(i[1])
+                        upcomingTemp.append(i[2])
+                        upcomingTemp.append(i[3])
+                        upcomingTemp.append(i[8])
+                        upcomingTemp.append("CLoth")
+                        upcoming.append(temp)
+                    if k == 9:
+                        upcomingTemp.append(i[1])
+                        upcomingTemp.append(i[2])
+                        upcomingTemp.append(i[3])
+                        upcomingTemp.append(i[9])
+                        upcomingTemp.append("Shocks")
+                        upcoming.append(temp)
+                    if len(upcomingTemp) == 0: pass 
+                    else: upcomingDf.loc[len(upcomingDf)] = upcomingTemp
+            k += 1
+
+    return behindDf, upcomingDf
+
 def returnDate(x):
-    #x = x + relativedelta(months=6)
     x = x.strftime("%m/%d/%Y")
     return x
 
-def getSpecificBrushData(brush):
-    return pd.DataFrame(list(Brush.objects.all().values().filter(brushStyle = brush))) 
+def getSpecificBrushData(brush, siteCode):
+    return pd.DataFrame(list(Brush.objects.all().values().filter(brushStyle = brush).filter(siteCode=siteCode))) 
 
-def getSpecificComponentData(id):
-    return pd.DataFrame(list(BrushComponent.objects.all().values().filter(brushID=id)))
+def getSpecificComponentData(id, siteCode):
+    return pd.DataFrame(list(BrushComponent.objects.all().values().filter(brushID=id).filter(siteCode=siteCode)))
 
-def getSpecificBrushDataById(brush):
-    return pd.DataFrame(list(Brush.objects.all().values().filter(id = brush)))
+def getSpecificBrushDataById(brush, siteCode):
+    return pd.DataFrame(list(Brush.objects.all().values().filter(id = brush).filter(siteCode=siteCode)))
 
-def returnDataFrames():
-    brushes =  ['Curtain', 'Rocker Brush', 'Wrap Brush', 'Side Washer']
+def returnComponentDataFrames(siteCode):
     otherComp = ['Takeup Drum', 'Sprocket', 'Fork Cover', 'Fork Cylinder',
         'Heco Drive', 'Conveyor Hydraulic Motor', 'Chain/Rollers']
-    brushIds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+
+    df = pd.DataFrame(columns=["id", "component", "dateReplaced", "dueDate", "notes", "siteCode"])
+    z = []
+    for i in otherComp:
+        try:
+            temp = pd.DataFrame(list(Maintenance.objects.all().values().filter(component = i).filter(siteCode=siteCode)))
+        except Exception as e:
+            temp = []
+        finally:
+            z.append(temp)
+    try:
+        df = pd.concat(z)
+    except Exception as e:
+        pass 
+    else:
+        df = df.drop(df.columns[[5]], axis=1)
+
+    return df
+
+def returnDataFrames(siteCode):
+    brushes =  ['Curtain', 'Rocker Brush', 'Wrap Brush', 'Side Washer']
+    brushIds = None 
+    if siteCode == 1: brushIds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+    else: brushIds = [14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
 
     df = pd.DataFrame(columns=['id', 'side', 'setNum', 'brushStyle', 'siteCode'])
     z = []
     for brush in brushIds:
-        temp = getSpecificBrushDataById(brush)
+        temp = getSpecificBrushDataById(brush, siteCode)
         z.append(temp)
 
     df = pd.concat(z)
@@ -98,7 +221,7 @@ def returnDataFrames():
     df2 = pd.DataFrame(columns=['id', 'brushID', 'motor', 'shaft', 'bearings', 'upperBearings', 'cloth', 'shocks', 'siteCode'])
     z2 = []
     for id in brushIds:
-        temp = getSpecificComponentData(id)
+        temp = getSpecificComponentData(id, siteCode)
         z2.append(temp)
     df2 = pd.concat(z2)
 
@@ -217,3 +340,10 @@ def getMaintenanceData(siteCode):
             maintenanceData.append(temp)
             z += 1
     return maintenanceData
+
+def getInventoryData(siteCode):
+    inventoryData = pd.DataFrame(columns=["id", "partName", "modelNumber", "quantity"])
+    data = list(Inventory.objects.all().values().filter(siteCode=siteCode))
+    for i in data:
+        inventoryData.loc[len(inventoryData)] = i
+    return inventoryData

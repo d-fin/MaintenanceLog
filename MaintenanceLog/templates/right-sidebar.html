@@ -1,4 +1,12 @@
 {% load static %}
+<script>
+    function getThemePref(){
+        var darkMode = document.getElementById("dark-mode-check");
+        var lightMode = document.getElementById("")
+    }
+
+</script>
+
 <!-- Right Sidebar -->
 <div class="right-bar">
 
@@ -21,13 +29,13 @@
             <hr class="mt-1" />
 
             <div class="custom-control custom-switch mb-1">
-                <input type="radio" class="custom-control-input" name="color-scheme-mode" value="light"
+                <input id="light-mode-check" type="radio" class="custom-control-input" name="color-scheme-mode" value="light"
                     id="light-mode-check" checked />
                 <label class="custom-control-label" for="light-mode-check">Light Mode</label>
             </div>
 
             <div class="custom-control custom-switch mb-1">
-                <input type="radio" class="custom-control-input" name="color-scheme-mode" value="dark"
+                <input id="dark-mode-check" type="radio" class="custom-control-input" name="color-scheme-mode" value="dark"
                     id="dark-mode-check" />
                 <label class="custom-control-label" for="dark-mode-check">Dark Mode</label>
             </div>

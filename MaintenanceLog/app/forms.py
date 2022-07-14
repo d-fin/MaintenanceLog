@@ -1,3 +1,4 @@
+from logging import PlaceHolder
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User 
 from django import forms 
@@ -20,3 +21,29 @@ class updateCompValueForm(forms.Form):
          (11, 'Chain/Rollers'), (12, "All Brushes"), (13, "All Components")], widget=forms.Select(
              attrs={'class' : 'dropdownMenu'}
          ))
+
+class editProfileForm(forms.Form):
+    name = forms.CharField(label="Name", max_length=50, widget=forms.TextInput(
+             attrs={'class' : 'text-box-form',
+                    'placeholder' : 'Full name' 
+                }
+    ))
+    email = forms.EmailField(label="Email", max_length=50, widget=forms.EmailInput(
+             attrs={'class' : 'text-box-form',
+                    'placeholder' : 'Email'
+             }
+    ))
+    username = forms.CharField(label="Username", max_length=20, widget=forms.TextInput(
+             attrs={'class' : 'text-box-form',
+                'placeholder' : 'Username'
+             }
+    ))
+    site = forms.ChoiceField(label=False, 
+        choices=[
+            (0, "Select a primary site"),
+            (1, "Gull Rd."),
+            (2, "Stadium Dr.")
+        ], 
+        widget=forms.Select(
+             attrs={'class' : 'dropdownMenu'}
+    ))

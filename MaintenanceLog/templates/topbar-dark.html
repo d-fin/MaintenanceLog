@@ -1,5 +1,12 @@
 {% load static %}
-<!-- Topbar Start -->
+<style>
+    .tab-down-display-pic{
+        flex-shrink: 0;
+        min-width: 100%;
+        min-height: 100%
+    } 
+
+</style>
 <div class="navbar-custom topnav-navbar topnav-navbar-dark">
     <div class="container-fluid">
 
@@ -49,10 +56,19 @@
                     <div class="p-2">
                         <div class="row no-gutters">
                             <div class="col">
-                                <a class="dropdown-icon-item" href="#">
+                                <a class="dropdown-icon-item" href="{% url 'home' %}?id=1">
+                                    <img id="tab-down-display-pic" src="{% static 'pictures/sudsinsuvs.jpg' %}" alt="SudsinsSuvs">
+                                    <span>Gull Rd.</span>
+                                </a>
+                                <a class="dropdown-icon-item" href="{% url 'home' %}?id=2">
+                                    <img id="tab-down-display-pic" src="{% static 'pictures/washinwagons.jpg' %}" alt="WashinWagons">
+                                    <span>Stadium Dr.</span>
+                                </a>
+                                <a class="dropdown-icon-item" href="https://github.com/d-fin/MaintenanceLog" target="_blank">
                                     <img src="{% static 'assets/images/brands/github.png' %}" alt="Github">
                                     <span>GitHub</span>
                                 </a>
+                                
                             </div>
                         </div>
                         <div class="row no-gutters"></div>
@@ -60,11 +76,11 @@
                 </div>
             </li>
 
-            <li class="notification-list">
+           <!--  <li class="notification-list">
                 <a class="nav-link right-bar-toggle" href="#">
                     <i class="dripicons-gear noti-icon"></i>
                 </a>
-            </li>
+            </li> -->
     
             <li class="dropdown notification-list">
                 <a class="nav-link dropdown-toggle nav-user arrow-none mr-0" data-toggle="dropdown" id="topbar-userdrop" href="#" role="button" aria-haspopup="true"
@@ -107,7 +123,8 @@
                 <span></span>
             </div>
         </a>
-        <div class="app-search dropdown">
+        
+       <!--  <div class="app-search dropdown">
             <form>
                 <div class="input-group">
                     <input type="text" class="form-control" placeholder="Search..." id="top-search">
@@ -119,7 +136,7 @@
             </form>
             <div class="dropdown-menu dropdown-menu-animated dropdown-lg" id="search-dropdown">  
             </div> 
-        </div>
+        </div> -->
     </div>
 </div>
 <!-- end Topbar -->

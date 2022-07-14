@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<style>
+    hr.rounded {
+        border-top: 8px solid #bbb;
+        border-radius: 5px;
+    }
+    hr.block{
+        border-top: 2px solid #bbb;
+        border-radius: 2px;
+    }
+    .dropdownMenu {
+        position: relative;
+        display: block;
+        width: 100%;
+        height: 2em;
+        line-height: 3;
+        overflow: hidden;
+        border-radius: .25em;
+        padding-bottom: 10px;
+    }
+    .text-box-form{
+        font-family: 'Roboto', sans-serif;
+        color: #333;
+        font-size: 1.5rem;
+        margin: 0 auto;
+        padding: 1.5rem 2rem;
+        border-radius: 0.2rem;
+        background-color: rgb(255, 255, 255);
+        border: none;
+        height: 20px;
+        width: 100%;
+        display: block;
+        border-bottom: 0.3rem solid 
+    }
+    .label{
+        font-family: 'Roboto', sans-serif;
+        font-size: 1rem;
+        margin-left: 2rem;
+        margin-top: 0.7rem;
+        display: block;
+        transition: all 0.3s;
+        transform: translateY(0rem);
+    }
+    #submit-button{
+        width: 100%;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="wrapper">
+        {% include 'left-sidebar.html' %}
+        <div class="content-page">
+            <div class="content">
+                <div class="row">
+                    <div class="col-lg-2"></div>
+                    <div class="col-lg-8">
+                        <div class="d-flex justify-content-center">
+                            {% if user.get_first_name %}
+                            <h1>{{ user.get_first_name }}'s Profile</h1>
+                            {% else %}
+                            <h1>Profile</h1>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-lg-2"></div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-2"></div>
+                    <div class="col-lg-8">
+                        <div class="d-flex justify-content-center">
+                            <img src="{% static 'pictures/blankavatar.png' %}"
+                                class="rounded-circle avatar-lg img-thumbnail" alt="profile-image">
+                        </div>
+                    </div>
+                    <div class="col-lg-2"></div>
+                </div>
+                <form method="post">
+                {% csrf_token %}
+                    <div class="row">
+                        <div class="col-lg-4"></div>
+                        <div class="col-lg-4">
+                            <hr class="block">
+                            <div class="d-flex justify-content-center">
+                                {{ form.name }}
+                            </div>
+                            <hr class="block">
+                        </div>
+                        <div class="col-lg-4"></div>
+                    </div>
+                    <!-- <br> -->
+                    <div class="row">
+                        <div class="col-lg-4"></div>
+                        <div class="col-lg-4">
+                            <div class="d-flex justify-content-center">
+                                {{ form.email }}
+                            </div>
+                            <hr class="block">
+                        </div>
+                        <div class="col-lg-4"></div>
+                    </div>
+                    <!-- <br> -->
+                    <div class="row">
+                        <div class="col-lg-4"></div>
+                        <div class="col-lg-4">
+                            <div class="d-flex justify-content-center">
+                                {{ form.username }}
+                            </div>
+                            <hr class="block">
+                        </div>
+                        <div class="col-lg-4"></div>
+                    </div>
+                    <!-- <br> -->
+                    <div class="row">
+                        <div class="col-lg-4"></div>
+                        <div class="col-lg-4">
+                            <div class="d-flex justify-content-center">
+                                {{ form.site }}
+                            </div>
+                            <hr class="block">
+                        </div>
+                        <div class="col-lg-4"></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-4"></div>
+                        <div class="col-lg-4">
+                            <div class="d-flex justify-content-center">
+                                <button type="submit" id="submit-button" class="btn btn-primary" value="submit" name="edit-profile">Submit</button>
+                            </div>
+                        </div>
+                        <div class="col-lg-4"></div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="{% static 'assets/js/vendor.min.js' %}"></script>
+<script src="{% static 'assets/js/app.min.js' %}"></script>
+
+<script src="{% static 'assets/js/vendor/apexcharts.min.js' %}"></script>
+<script src="{% static 'assets/js/vendor/jquery-jvectormap-1.2.2.min.js' %}"></script>
+<script src="{% static 'assets/js/vendor/jquery-jvectormap-world-mill-en.js' %}"></script> 
+{% endblock content %}
