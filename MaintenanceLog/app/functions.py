@@ -38,7 +38,7 @@ def getSpecificCompData(comp, siteCode):
     
     if comp in otherComp:
         headers = ["Part", "Date Replaced", "Due Date", "Notes"]
-        compData = pd.DataFrame(list(Maintenance.objects.all().values().filter(component = comp)))
+        compData = pd.DataFrame(list(Maintenance.objects.all().values().filter(component = comp).filter(siteCode=siteCode)))
         compData = compData.drop(compData.columns[[5]], axis=1)
         compData = compData.values.tolist()
         for i in compData:
@@ -170,9 +170,8 @@ def getTasks(siteCode):
     return behindDf, upcomingDf
 
 def returnDate(x):
-    x = x.strftime("%m/%d/%Y")
-    return x
-
+    return x.strftime("%m/%d/%Y")
+    
 def getSpecificBrushData(brush, siteCode):
     return pd.DataFrame(list(Brush.objects.all().values().filter(brushStyle = brush).filter(siteCode=siteCode))) 
 
@@ -315,7 +314,11 @@ def getBrushData(siteCode):
         'Wrap Brushes' : wrap}
 
 def getMaintenanceData(siteCode):
-    maintenanceData = []
+    maintenanceData = pd.DataFrame(list(Maintenance.objects.all().values().filter(siteCode=siteCode)))
+    maintenanceData = maintenanceData.drop(maintenanceData.columns[[5]], axis=1)
+    maintenanceData = maintenanceData.values.tolist()
+    maintenanceData = convertTime(maintenanceData)
+    """  maintenanceData = []
     compName = ['Takeup Drum', 'Sprocket', 'Fork Cover', 'Fork Cylinder', 'Heco Drive', 'Conveyor Hydraulic Motor', 'Chain/Rollers']
     headers = [1, 2, 3, 4]
     with connection.cursor() as cursor:
@@ -338,7 +341,7 @@ def getMaintenanceData(siteCode):
                     headerCount += 1
                 kount += 1
             maintenanceData.append(temp)
-            z += 1
+            z += 1 """
     return maintenanceData
 
 def getInventoryData(siteCode):
@@ -347,3 +350,38 @@ def getInventoryData(siteCode):
     for i in data:
         inventoryData.loc[len(inventoryData)] = i
     return inventoryData
+
+def convertTime(df):
+    for i in df:
+            for j in range(len(i)):
+                if isinstance(i[j], datetime.date) == True:
+                    temp = returnDate(i[j])
+                    i[j] = temp
+    return df
+
+def getBrushDataToDisplay(id, siteCode):
+    wrapData = pd.DataFrame()
+    brushData = pd.DataFrame()
+    x = []
+    y = []
+    for i in id: 
+        temp = pd.DataFrame(list(BrushComponent.objects.values().filter(siteCode=siteCode).filter(brushID=i)))
+        temp2 = pd.DataFrame(list(Brush.objects.all().values().filter(siteCode=siteCode).filter(id=i)))
+        x.append(temp)
+        y.append(temp2)
+
+    wrapData = pd.concat(x)
+    brushData = pd.concat(y)
+
+    brushData = brushData.drop(brushData.columns[[3, 4]], axis=1)
+    wrapData = pd.merge(wrapData, brushData, on="id", how="right")
+
+    wrapDataCurrent = wrapData[["side", "setNum", "brushID", "motor", "shaft", "bearings", "upperBearings", "cloth", "shocks"]]
+    wrapDataDueDate = wrapData[["side", "setNum", "brushID", "motorDueDate", "shaftDueDate", "bearingsDueDate", "upperBearingsDueDate", "clothDueDate",  "shocksDueDate"]]
+    wrapDataCurrent = wrapDataCurrent.values.tolist() 
+    wrapDataDueDate = wrapDataDueDate.values.tolist()
+
+    wrapDataCurrent = convertTime(wrapDataCurrent)
+    wrapDataDueDate = convertTime(wrapDataDueDate)
+    
+    return wrapDataCurrent, wrapDataDueDate

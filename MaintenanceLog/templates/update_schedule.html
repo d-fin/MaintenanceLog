@@ -2,7 +2,6 @@
 {% load static %}
 {% block content %}
 
-<!-- <body class="loading" data-layout="detached" data-layout-config='{"leftSidebarCondensed":false,"darkMode":false, "showRightSidebarOnStart": true}'> -->
     <div class="container-fluid">
         <div class="wrapper">
             {% include "left-sidebar.html" %}
@@ -23,7 +22,7 @@
                                     <form action="" method='post'>
                                         {% csrf_token %}
                                         {{ formSelect.as_p }}
-                                        <input class="inputForm" type="submit" value="Select">
+                                        <input class="inputForm" type="submit" value="Select" name="brushBtn">
                                     </form>
                                 </div>
                             </div>
@@ -35,7 +34,7 @@
                             <table class="table table-centered mb-0">
                                 <thead>
                                     <tr>
-                                        {% for i in headers %}
+                                        {% for i in headersBrushes %}
                                         <th>{{ i }}</th>
                                         {% endfor %}
                                     </tr>
@@ -53,7 +52,63 @@
                                 </tbody>
                                 {% endfor %}
                             </table>
+                            <hr class="rounded">
                             {% endif %}
+                            
+                            {% if curtainCur %}
+                            <h4>{{ component }}</h4>
+                            <h5>Dates shown are the dates of last update. (This table cannot be edited) </h5>
+                            <table class="table table-centered mb-0">
+                                <thead>
+                                    <tr>
+                                        {% for i in headersBrushes %}
+                                        <th>{{ i }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                {% for i in curtainCur %}
+                                <tbody>
+                                    <td>{{ i.0 }}</td>
+                                    <td>{{ i.1 }}</td>
+                                    <td>{{ i.3 }}</td>
+                                    <td>{{ i.4 }}</td>
+                                    <td>{{ i.5 }}</td>
+                                    <td>{{ i.6 }}</td>
+                                    <td>{{ i.7 }}</td>
+                                    <td>{{ i.8 }}</td>
+                                </tbody>
+                                {% endfor %}
+                            </table>
+                            <hr class="rounded">
+                            {% endif %}
+                            
+                            {% if rockerCur %}
+                            <h4>{{ component }}</h4>
+                            <h5>Dates shown are the dates of last update. (This table cannot be edited) </h5>
+                            <table class="table table-centered mb-0">
+                                <thead>
+                                    <tr>
+                                        {% for i in headersBrushes %}
+                                        <th>{{ i }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                {% for i in rockerCur %}
+                                <tbody>
+                                    <td>{{ i.0 }}</td>
+                                    <td>{{ i.1 }}</td>
+                                    <td>{{ i.3 }}</td>
+                                    <td>{{ i.4 }}</td>
+                                    <td>{{ i.5 }}</td>
+                                    <td>{{ i.6 }}</td>
+                                    <td>{{ i.7 }}</td>
+                                    <td>{{ i.8 }}</td>
+                                </tbody>
+                                {% endfor %}
+                            </table>
+                            <hr class="rounded">
+                            {% endif %}
+                                                        
                             {% if compData %}
                             {% if component2 %}
                             <h4>{{ component2 }}</h4>
@@ -79,40 +134,168 @@
                                 {% endfor %}
                                 </tbody>
                             </table>
+                            <hr class="rounded">
                             {% endif %}
                         </div>
                     </div> <!--end row-->
-                    {% if brushes %}
-                    <hr class="rounded">
-                    {% endif %}
                     <div class="row">
                         <div class="col-lg-12">
                             {% if brushes %}
                             <h4>{{ component }}</h4>
-                            <h5>Make updates in table below - click on table where you want to update the date.</h5>
+                            <h5>Component updated date</h5>
                             <table class="table table-centered mb-0">
                                 <thead>
                                     <tr>
-                                        {% for i in headers %}
+                                        {% for i in headersBrushes %}
                                         <th>{{ i }}</th>
                                         {% endfor %}
                                     </tr>
                                 </thead>
-                                {% for i in brushes %}
                                 <tbody>
-                                    <td class="editable" data-id="{{ i.2 }}" data-type="side">{{ i.0 }}</td>
-                                    <td class="editable" data-id="{{ i.2 }}" data-type="setNum">{{ i.1 }}</td>
-                                    <td class="editable" data-id="{{ i.2 }}" data-type="motor">{{ i.3 }}</td>
-                                    <td class="editable" data-id="{{ i.2 }}" data-type="shaft">{{ i.4 }}</td>
-                                    <td class="editable" data-id="{{ i.2 }}" data-type="bearings">{{ i.5 }}</td>
-                                    <td class="editable" data-id="{{ i.2 }}" data-type="upperBearings">{{ i.6 }}</td>
-                                    <td class="editable" data-id="{{ i.2 }}" data-type="cloth">{{ i.7 }}</td>
-                                    <td class="editable" data-id="{{ i.2 }}" data-type="shocks">{{ i.8 }}</td>
+                                {% for i in brushes %}
+                                    <tr>
+                                        <td class="editable" data-id="{{ i.2 }}" data-type="side">{{ i.0 }}</td>
+                                        <td class="editable" data-id="{{ i.2 }}" data-type="setNum">{{ i.1 }}</td>
+                                        <td class="editable" data-id="{{ i.2 }}" data-type="motor">{{ i.3 }}</td>
+                                        <td class="editable" data-id="{{ i.2 }}" data-type="shaft">{{ i.4 }}</td>
+                                        <td class="editable" data-id="{{ i.2 }}" data-type="bearings">{{ i.5 }}</td>
+                                        <td class="editable" data-id="{{ i.2 }}" data-type="upperBearings">{{ i.6 }}</td>
+                                        <td class="editable" data-id="{{ i.2 }}" data-type="cloth">{{ i.7 }}</td>
+                                        <td class="editable" data-id="{{ i.2 }}" data-type="shocks">{{ i.8 }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                            <hr class="rounded">
+                            {% endif %}
+                            
+                            {% if dueDate %}
+                            <h5>Suggested due date</h5>
+                            <table class="table table-centered mb-0">
+                                <thead>
+                                    <tr>
+                                        {% for i in headersBrushes %}
+                                        <th>{{ i }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                {% for i in dueDate %}
+                                <tbody>
+                                    <td class="" data-id="{{ i.2 }}" data-type="sideDue">{{ i.0 }}</td>
+                                    <td class="" data-id="{{ i.2 }}" data-type="setNumDue">{{ i.1 }}</td> 
+                                    <td class="" data-id="{{ i.2 }}" data-type="motorDue">{{ i.3 }}</td>
+                                    <td class="" data-id="{{ i.2 }}" data-type="shaftDue">{{ i.4 }}</td>
+                                    <td class="" data-id="{{ i.2 }}" data-type="bearingsDue">{{ i.5 }}</td>
+                                    <td class="" data-id="{{ i.2 }}" data-type="upperBearingsDue">{{ i.6 }}</td>
+                                    <td class="" data-id="{{ i.2 }}" data-type="clothDue">{{ i.7 }}</td>
+                                    <td class="" data-id="{{ i.2 }}" data-type="shocksDue">{{ i.8 }}</td>
                                 </tbody>
                                 {% endfor %}
                                 </tbody>
                             </table>
+                            <hr class="rounded">
                             {% endif %}
+
+                            {% if curtainCur %}
+                            <h4>{{ component }}</h4>
+                            <h5>Component updated date</h5>
+                            <table class="table table-centered mb-0">
+                                <thead>
+                                    <tr>
+                                        {% for i in headersBrushes %}
+                                        <th>{{ i }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% for i in curtainCur %}
+                                    <tr>
+                                        <td class="editable" data-id="{{ i.2 }}" data-type="side">{{ i.0 }}</td>
+                                        <td class="editable" data-id="{{ i.2 }}" data-type="setNum">{{ i.1 }}</td>
+                                        <td class="editable" data-id="{{ i.2 }}" data-type="motor">{{ i.3 }}</td>
+                                        <td class="editable" data-id="{{ i.2 }}" data-type="cloth">{{ i.4 }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                            <hr class="rounded">
+                            {% endif %}
+
+                            {% if curtainDue %}
+                            <h5>Suggested due date</h5>
+                            <table class="table table-centered mb-0">
+                                <thead>
+                                    <tr>
+                                        {% for i in headersBrushes %}
+                                        <th>{{ i }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                {% for i in curtainDue %}
+                                <tbody>
+                                    <td class="" data-id="{{ i.2 }}" data-type="sideDue">{{ i.0 }}</td>
+                                    <td class="" data-id="{{ i.2 }}" data-type="setNumDue">{{ i.1 }}</td> 
+                                    <td class="" data-id="{{ i.2 }}" data-type="motorDue">{{ i.3 }}</td>
+                                    <td class="" data-id="{{ i.2 }}" data-type="shocksDue">{{ i.4 }}</td>
+                                </tbody>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                            <hr class="rounded">
+                            {% endif %}
+
+                            {% if rockerCur %}
+                            <h4>{{ component }}</h4>
+                            <h5>Component updated date</h5>
+                            <table class="table table-centered mb-0">
+                                <thead>
+                                    <tr>
+                                        {% for i in headersBrushes %}
+                                        <th>{{ i }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% for i in rockerCur %}
+                                    <tr>
+                                        <td class="editable" data-id="{{ i.2 }}" data-type="side">{{ i.0 }}</td>
+                                        <td class="editable" data-id="{{ i.2 }}" data-type="setNum">{{ i.1 }}</td>
+                                        <td class="editable" data-id="{{ i.2 }}" data-type="motor">{{ i.3 }}</td>
+                                        <td class="editable" data-id="{{ i.2 }}" data-type="bearings">{{ i.4 }}</td>
+                                        <td class="editable" data-id="{{ i.2 }}" data-type="cloth">{{ i.5 }}</td>
+                                        <td class="editable" data-id="{{ i.2 }}" data-type="shocks">{{ i.6 }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                            <hr class="rounded">
+                            {% endif %}
+
+                            {% if rockerDue %}
+                            <h5>Suggested due date</h5>
+                            <table class="table table-centered mb-0">
+                                <thead>
+                                    <tr>
+                                        {% for i in headersBrushes %}
+                                        <th>{{ i }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                {% for i in rockerDue %}
+                                <tbody>
+                                    <td class="" data-id="{{ i.2 }}" data-type="sideDue">{{ i.0 }}</td>
+                                    <td class="" data-id="{{ i.2 }}" data-type="setNumDue">{{ i.1 }}</td> 
+                                    <td class="" data-id="{{ i.2 }}" data-type="motorDue">{{ i.3 }}</td>
+                                    <td class="" data-id="{{ i.2 }}" data-type="bearingsDue">{{ i.4 }}</td>
+                                    <td class="" data-id="{{ i.2 }}" data-type="clothDue">{{ i.5 }}</td>
+                                    <td class="" data-id="{{ i.2 }}" data-type="shocksDue">{{ i.6 }}</td>
+                                </tbody>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                            <hr class="rounded">
+                            {% endif %}
+
                             {% if compData %}
                             {% if component2 %}
                             <h4>{{ component2 }}</h4>
@@ -132,39 +315,29 @@
                                 <tbody>
                                     <td class="editable" data-id="{{ i.0 }}" data-type="name">{{ i.1 }}</td>
                                     <td class="editable" data-id="{{ i.0 }}" data-type="dateReplaced">{{ i.2 }}</td>
-                                    <td class="editable" data-id="{{ i.0 }}" data-type="dueDate">{{ i.3 }}</td>
+                                    <td class="" data-id="{{ i.0 }}" data-type="dueDate">{{ i.3 }}</td>
                                     <td class="editable" data-id="{{ i.0 }}" data-type="notes2">{{ i.4 }}</td>
                                 </tbody>
                                 {% endfor %}
                                 </tbody>
                             </table>
+                            <hr class="rounded">
                             {% endif %}
                         </div>
                     </div>
-                    {% if brushes %}
-                    <hr class="rounded">
-                    {% endif %}
+                   
                 </div>
             </div>
         </div>
     </div>
-
-
-    {% include "right-sidebar.html" %}
-
-    <!-- bundle -->
     <script src="{% static 'assets/js/vendor.min.js' %}"></script>
     <script src="{% static 'assets/js/app.min.js' %}"></script>
 
-    <!-- third party js -->
-    <script src="{% static 'assets/js/vendor/Chart.bundle.min.js' %}"></script>
-    <!-- third party js ends -->
+    <script src="{% static 'assets/js/vendor/apexcharts.min.js' %}"></script>
+    <script src="{% static 'assets/js/vendor/jquery-jvectormap-1.2.2.min.js' %}"></script>
+    <script src="{% static 'assets/js/vendor/jquery-jvectormap-world-mill-en.js' %}"></script>
+  
 
-    <!-- demo app -->
-    <script src="{% static 'assets/js/pages/demo.dashboard-projects.js' %}"></script>
-    <!-- end demo js-->
-
-<!-- </body> -->
 <style>
     .inputForm {
         background-color: whitesmoke;

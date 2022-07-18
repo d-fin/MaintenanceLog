@@ -1,6 +1,6 @@
-from logging import PlaceHolder
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User 
+from django.contrib.auth.models import User
+from .models import Maintenance
 from django import forms 
 
 class CreateUserForm(UserCreationForm):
@@ -21,6 +21,24 @@ class updateCompValueForm(forms.Form):
          (11, 'Chain/Rollers'), (12, "All Brushes"), (13, "All Components")], widget=forms.Select(
              attrs={'class' : 'dropdownMenu'}
          ))
+
+class updateTimeForm(forms.Form):
+    id = forms.IntegerField()
+    time = forms.ChoiceField(label=False,
+        choices = [
+            (0, "Select time to update"),
+            (1, "3 Months"),
+            (2, "6 Months"),
+            (3, "9 Months"),
+            (4, "1 Year")
+        ],
+        widget=forms.Select(
+            attrs={'class' : 'timeDropDown',
+                    'name' : 'timeBtn',
+                    'onChange' : 'form.submit()'
+                }
+        )
+    )
 
 class editProfileForm(forms.Form):
     name = forms.CharField(label="Name", max_length=50, widget=forms.TextInput(
@@ -47,3 +65,16 @@ class editProfileForm(forms.Form):
         widget=forms.Select(
              attrs={'class' : 'dropdownMenu'}
     ))
+
+class textAreaForm(forms.Form):
+    notes = forms.CharField(label=False,
+        widget=forms.Textarea(
+            attrs={'class' : 'notesTextArea',
+                'rows' : 5,
+                'cols' : 50 
+            }
+        )
+    )
+    class Meta:
+        model = Maintenance
+        fields = ['notes']

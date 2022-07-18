@@ -1,3 +1,4 @@
+from datetime import timedelta
 from email.message import Message
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
@@ -5,7 +6,7 @@ from django.db import connection
 from django.contrib.auth.admin import * 
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout 
-from .forms import CreateUserForm, DropdownMenuForm, updateCompValueForm, editProfileForm
+from .forms import CreateUserForm, DropdownMenuForm, updateCompValueForm, editProfileForm, updateTimeForm, textAreaForm
 from django.contrib.auth.decorators import login_required
 from django.db.models import Max
 import pdb
@@ -13,11 +14,14 @@ import pdb
 from dateutil import parser
 import numpy as np 
 import plotly.express as px 
+import plotly.graph_objs as go
+from plotly.offline import plot
 import pandas as pd 
+from dateutil.relativedelta import relativedelta
+
 
 from app.functions import *
 # Create your views here.
-
 
 #home page
 @login_required 
@@ -25,16 +29,14 @@ def home(request):
     changeSite = request.GET.get('id','')
 
     if changeSite == "":
-        currentUser = request.user
-        id = currentUser.id
-        siteCode = id
+        siteCode = request.session['siteCode']
     else:
         if int(changeSite) == 1:
             siteCode = int(changeSite)
         elif int(changeSite) == 2:
             siteCode = int(changeSite)
-    request.session['siteCode'] = siteCode
-        #request.session['id'] == ""
+        request.session['siteCode'] = siteCode
+    
     
     maintenanceData = getMaintenanceData(siteCode)
     brushData = getBrushData(siteCode)
@@ -71,6 +73,18 @@ def home(request):
 
     behindCount = behind.shape[0]
     upcomingCount = upcoming.shape[0]
+
+    if request.method == "POST":
+        form = textAreaForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data.get('notes')
+            id = request.POST.get('noteId', '')
+            x = Maintenance.objects.get(id=int(id))
+            x.notes = data 
+            x.save()
+    else:
+        form = textAreaForm()
+
     context = {
         'df' : maintenanceData,
         'curtains' : curtains,
@@ -86,17 +100,17 @@ def home(request):
         'behindCount' : behindCount,
         'upcoming' : upcoming,
         'upcomingCount' : upcomingCount,
+        'form' : form
     }
 
     return render(request, 'index.html', context)
 
 @login_required
 def updateSchedule(request):
-
     siteCode = request.session.get('siteCode', '')
 
     choices =  [(0, 'Select'), (1, 'Curtain'), (2, 'Rocker Brush'),
-         (3, 'Wrap Brush'), (4, 'Side Brush'),
+         (3, 'Wrap Brush'), (4, 'Side Washer'),
          (5, 'Takeup Drum'), (6, 'Sprocket'),
          (7, 'Fork Cover'), (8, 'Fork Cylinder'),
          (9, 'Heco Drive'), (10, 'Conveyor Hydraulic Motor'),
@@ -107,59 +121,119 @@ def updateSchedule(request):
         'Heco Drive', 'Conveyor Hydraulic Motor', 'Chain/Rollers']
     
     brushes, headersBrushes, component, component2, headersComp, compData = None, None, None, None, None, None
+    current, dueDate, comp = None, None, None
+    rockerCurrent, curtainCurrent, rockerDueDate, curtainDueDate = None, None, None, None 
     formSelect = updateCompValueForm()
+
     if request.method == 'POST':
-        comp = None
-        formSelect = updateCompValueForm(request.POST)
-        if formSelect.is_valid():
-            data = formSelect.cleaned_data.get('component')
-            if int(data) == 0:
-                return redirect('update_schedule')
-            elif int(data) == 12:
-                z = []
-                brushes = []
-                for i in brushesStrings:
-                    headersBrushes, temp = getSpecificCompData(i, siteCode)
-                    z.append(temp)
-                for j in z:
-                    for x in j:
-                        brushes.append(x)
-            elif int(data) == 13:
-                z = []
-                brushes = []
-                for i in brushesStrings:
-                    headersBrushes, temp = getSpecificCompData(i, siteCode)
-                    z.append(temp)
-                for j in z:
-                    for x in j:
-                        brushes.append(x)
-                a = []
-                compData = []       
-                for i in otherCompStrings:
-                    headersComp, temp = getSpecificCompData(i, siteCode)
-                    a.append(temp)
-                for j in a:
-                    for x in j:
-                        compData.append(x)
-            else:
-                for i in choices: 
-                    if int(data) == int(i[0]):
-                        comp = i[1]
-                        break 
-                component = comp
-                if comp in brushesStrings:
-                    headersBrushes, brushes = getSpecificCompData(comp, siteCode)
-                elif comp in otherCompStrings:
-                    headersComp, compData = getSpecificCompData(comp, siteCode)
-            if int(data) == 13:
-                component = "All Brushes"
-                component2 = "All Components"        
+        if "brushBtn" in request.POST:
+            comp = None
+            formSelect = updateCompValueForm(request.POST)
+            if formSelect.is_valid():
+                data = formSelect.cleaned_data.get('component')
+                if int(data) == 0:
+                    return redirect('update_schedule')
+                elif int(data) == 12:
+                    z = []
+                    brushes = []
+                    for i in brushesStrings:
+                        headersBrushes, temp = getSpecificCompData(i, siteCode)
+                        z.append(temp)
+                    for j in z:
+                        for x in j:
+                            brushes.append(x)
+                elif int(data) == 13:
+                    z = []
+                    brushes = []
+                    for i in brushesStrings:
+                        headersBrushes, temp = getSpecificCompData(i, siteCode)
+                        z.append(temp)
+                    for j in z:
+                        for x in j:
+                            brushes.append(x)
+                    a = []
+                    compData = []       
+                    for i in otherCompStrings:
+                        headersComp, temp = getSpecificCompData(i, siteCode)
+                        a.append(temp)
+                    for j in a:
+                        for x in j:
+                            compData.append(x)
+                else:
+                    for i in choices: 
+                        if int(data) == int(i[0]):
+                            comp = i[1]
+                            break 
+                    component = comp
+                    if comp in brushesStrings:
+                        if comp == "Wrap Brush":
+                            brushIds = Brush.objects.all().values().filter(brushStyle=comp).filter(siteCode=siteCode)
+                            ids = []
+                            for i in brushIds:
+                                ids.append(i['id'])
+                            current, dueDate = getBrushDataToDisplay(ids, siteCode)
+                        elif comp == "Rocker Brush":
+                            brushIds = Brush.objects.all().values().filter(brushStyle=comp).filter(siteCode=siteCode)
+                            ids = []
+                            for i in brushIds:
+                                ids.append(i['id'])
+                            current, dueDate = getBrushDataToDisplay(ids, siteCode)
+                            current = pd.DataFrame(current)
+                            dueDate = pd.DataFrame(dueDate)
+
+                            current = current.drop(current.columns[[4, 6]], axis=1)
+                            dueDate = dueDate.drop(dueDate.columns[[4, 6]], axis=1)
+                            current = current.values.tolist()
+                            dueDate = dueDate.values.tolist()
+
+                        elif comp == "Curtain":
+                            brushIds = Brush.objects.all().values().filter(brushStyle=comp).filter(siteCode=siteCode)
+                            ids = []
+                            for i in brushIds:
+                                ids.append(i['id'])
+                            curtainCurrent, curtainDueDate = getBrushDataToDisplay(ids, siteCode)
+                            curtainCurrent = pd.DataFrame(curtainCurrent)
+                            curtainDueDate = pd.DataFrame(curtainDueDate)
+
+                            curtainCurrent = curtainCurrent.drop(curtainCurrent.columns[[4, 5, 6, 8]], axis=1)
+                            curtainCurrent = curtainCurrent.values.tolist()
+                            curtainDueDate = curtainDueDate.drop(curtainDueDate.columns[[4, 5, 6, 8]], axis=1)
+                            curtainDueDate = curtainDueDate.values.tolist()
+
+                        elif comp == "Side Washer":
+                            brushIds = Brush.objects.all().values().filter(brushStyle=comp).filter(siteCode=siteCode)
+                            ids = []
+                            for i in brushIds:
+                                ids.append(i['id'])
+                            current, dueDate = getBrushDataToDisplay(ids, siteCode)
+                        else: 
+                            current, dueDate = None, None 
+
+                    elif comp in otherCompStrings:
+                        headersComp, compData = getSpecificCompData(comp, siteCode)
+                if int(data) == 13:
+                    component = "All Brushes"
+                    component2 = "All Components"
+
+    if comp == "Curtain":
+        headersBrushes = ['Side', 'Set Num', 'Motor', 'Cloth'] 
+    elif comp == "Rocker Brush":
+        headersBrushes = ['Side', 'Set Num', 'Motor', 'Bearings', 'Cloth', 'Shocks']
+    else:       
+        headersBrushes = ['Side', 'Set Num', 'Motor', 'Shaft', 'Bearings', 'Upper Bearings', 'Cloth', 'Shocks']
+    headersComp = ["Part", "Date Replaced", "Due Date", "Notes"]
+
     context = {
         'formSelect' : formSelect,
         'component' : component,
         'component2' : component2,
-        'headers' : headersBrushes,
-        'brushes' : brushes,
+        'headersBrushes' : headersBrushes, #if statement above changes these based on brush style
+        'brushes' : current, #wrap and side brushes 
+        'dueDate' : dueDate, #wrap and side brushes 
+        'curtainCur' : curtainCurrent,
+        'curtainDue' : curtainDueDate,
+        'rockerCur' : rockerCurrent,
+        'rockerDue' : rockerDueDate,
         'headersComp' : headersComp,
         'compData' : compData,
     }
@@ -178,8 +252,50 @@ def update_inventory(request):
 
 @login_required
 def inventory_details(request):
-    context = {
+    siteCode = request.session.get('siteCode', '')
+    inventory = getInventoryData(siteCode)
+    inventoryHeaders = ["Part", "Model Number", "Quantity"]
+    
+    # bar graph quantities
+    quantityDf = pd.DataFrame(columns=["Part", "Quantity"])
+    quantityDf['Part'] = inventory['partName']
+    quantityDf['Quantity'] = inventory['quantity']
+    partNames = [i for i in quantityDf['Part']]
+    fig = px.bar(
+        x = quantityDf['Part'], 
+        y = quantityDf['Quantity'],
+        color = (partNames),
+        labels = dict(x = "Part", y = "Quantity", color = "Part")
+    )
 
+    bar_plot = plot(fig, output_type='div')
+    # end bar graph quantities
+
+    # gantt plot 
+    """ componentData = Maintenance.objects.filter(siteCode=siteCode, dateReplaced__isnull=False)
+     
+    data = [
+        {
+            'comp' : x.component,
+            'dateReplaced' : x.dateReplaced.strftime("%Y/%m/%d"),
+            'dueDate' : (x.dateReplaced + datetime.timedelta(months=6)).strftime("%Y/%m/%d")
+        } for x in componentData ]
+    pdb.set_trace()
+    df = pd.DataFrame(data)
+    fig = px.timeline(
+        df, x_start="dateReplaced", 
+        x_end="dueDate",
+        y="comp",
+        color="comp"
+    )
+    fig.update_yaxes(autorange="reversed")
+    gannt_plot = plot(fig, output_type='div') """
+
+    # end gantt plot 
+
+    context = {
+        'barPlot' : bar_plot,
+        #'gantt' : gannt_plot,
     }
     return render(request, 'inventory_details.html', context)
 
@@ -200,12 +316,16 @@ def addBrush(request):
 #User register page
 def register(request):
     form = CreateUserForm()
-
     if request.method == 'POST':
+        id = None 
         form = CreateUserForm(request.POST)
         if form.is_valid():
             form.save()
             user = form.cleaned_data.get('username')
+            userInfo = User.objects.all().values().filter(username=user)
+            id = userInfo[0]['id']
+            newEmployee = Employee.objects.create(user_id=id)
+            newEmployee.save()
             messages.success(request, 'Account was created for ' + user)
             return redirect('login')
 
@@ -221,8 +341,13 @@ def loginUser(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
         user = authenticate(request, username = username, password = password)
+        siteCode = None 
         if user is not None:
             login(request, user)
+            id = user.id 
+            emp = Employee.objects.all().values().filter(user_id=id)
+            siteCode = emp[0]['site']
+            request.session['siteCode'] = siteCode
             return redirect('home')
         else:
             messages.error(request, "Error logging in")
@@ -253,8 +378,8 @@ def userAccount(request):
     
     userData = pd.DataFrame(list(User.objects.all().values().filter(id=id)))
     userData = userData.drop(userData.columns[[1, 2, 3, 8, 9, 10]], axis=1)
-    site = pd.DataFrame(list(Employee.objects.all().values().filter(id=id)))
-    site = site.drop(site.columns[[0, 2]], axis=1)
+    site = pd.DataFrame(list(Employee.objects.all().values().filter(user_id=id)))
+    site = site.drop(site.columns[[0, 1]], axis=1)
     site = site.values.tolist()
     site = site[0][0]
 
@@ -265,7 +390,6 @@ def userAccount(request):
         x = "Stadium Dr."
 
     userData['site'] = x
-
     context = {
         'site' : x,
         'df' : userData,
@@ -330,15 +454,6 @@ def saveInventory(request):
             #if type == "" or value == "":
             newObj = Inventory(newId, None, None, 0, siteCode)
             newObj.save()
-            """ if type == 'partName':
-                newObj = Inventory(newId, value, None, 0)
-                newObj.save()
-            if type == 'modelNumber':
-                newObj = Inventory(newId, None, value, 0)
-                newObj.save()
-            if type == 'quantity':
-                newObj = Inventory(newId, None, None, value)
-                newObj.save() """
         else:
             inventoryData = Inventory.objects.get(id=id)
             if type == 'partName':
@@ -351,8 +466,16 @@ def saveInventory(request):
         
     return JsonResponse({"success" : "Updated"})
 
-def getUpdate_SchedulePage():
-    return 
+def updateNotes(request):
+    id = request.POST.get('id', '')
+    value = request.POST.get('value', '')
+    type = request.POST.get("type", '')
+    if type == 'notes':
+        compData = Maintenance.objects.get(id=id)
+        compData.notes = value 
+        compData.save()
+
+    return JsonResponse({"success" : "Updated"})
 
 def saveSchedule(request):
     id = request.POST.get('id', '')
@@ -382,6 +505,8 @@ def saveSchedule(request):
             compData.component = value 
         if type == "dateReplaced":
             compData.dateReplaced = value 
+            newDueDate = value + relativedelta(months=6)
+            compData.dueDate = newDueDate
         if type == "dueDate":
             compData.dueDate = value 
         if type == "notes2":
