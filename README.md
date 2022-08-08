@@ -5,7 +5,7 @@
 - Install instructions are for Ubuntu Linux. Most commands will work on macOS with minor tweaks. 
 
 # Installation Instructions 
-# ---------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------
 # Install mySQL Server and create database 
 
 - Install 
@@ -35,8 +35,10 @@
     mysql> FLUSH PRIVILEGES;
     ```
 
-# ---------------------------------------------------------------------------------------------------
-# Install/create virtual enviornment 
+# -----------------------------------------------------------
+# Install/create/activate virtual enviornment 
+
+- Install virtualenv 
 
     ```
     $ sudo apt install virtualenv -y
@@ -55,7 +57,7 @@
     $ source bin/activate 
     ```
 
-# ---------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------
 # Install python + python dependencies 
 
 - Install python 
@@ -70,7 +72,7 @@
     (env)$ python3 install -r requirements.txt
     ```
 
-# ---------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------
 # Running the test server 
 
 - Make DB migrations 
@@ -86,5 +88,5 @@
     (env)$ python3 manage.py runserver 
     ```
 
-# ---------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------
 # Deploy
