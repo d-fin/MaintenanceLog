@@ -1,3 +1,4 @@
+from email.policy import default
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.db import connection
@@ -415,7 +416,6 @@ def edit_profile(request):
 def saveInventory(request):
     siteCode = request.session['siteCode']
     delete = request.POST.get('delete', '')
-
     if delete == "True":
         id = int(request.POST.get('id', ''))
         data = Inventory.objects.get(id=id)
@@ -430,7 +430,7 @@ def saveInventory(request):
             maxId = int(maxId['id__max'])
             newId = int(maxId) + 1
             #if type == "" or value == "":
-            newObj = Inventory(newId, None, None, 0, siteCode)
+            newObj = Inventory(newId, "Enter a part name", None, 0, siteCode)
             newObj.save()
         else:
             inventoryData = Inventory.objects.get(id=id)
