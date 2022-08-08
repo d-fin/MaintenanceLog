@@ -1,0 +1,32 @@
+.inputForm {
+    background-color: whitesmoke;
+    border-color: #4169E1;
+    position: relative;
+    display: block;
+    width: 8em;
+    height: 3.2em;
+    line-height: 3;
+    overflow: hidden;
+    border-radius: .25em;
+    padding-bottom: 10px;
+}
+
+.dropdownMenu {
+    position: relative;
+    display: block;
+    width: 8em;
+    height: 2em;
+    line-height: 3;
+    overflow: hidden;
+    border-radius: .25em;
+    padding-bottom: 10px;
+}
+
+hr.rounded {
+    border-top: 8px solid #bbb;
+    border-radius: 5px;
+}
+.border-right{
+    border-right: 15px solid #bbb;
+    border-radius: 10px;   
+}

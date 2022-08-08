@@ -66,7 +66,7 @@ class editProfileForm(forms.Form):
              attrs={'class' : 'dropdownMenu'}
     ))
 
-class textAreaForm(forms.Form):
+""" class textAreaForm(forms.Form):
     notes = forms.CharField(label=False,
         widget=forms.Textarea(
             attrs={'class' : 'notesTextArea',
@@ -77,4 +77,4 @@ class textAreaForm(forms.Form):
     )
     class Meta:
         model = Maintenance
-        fields = ['notes']
+        fields = ['notes'] """

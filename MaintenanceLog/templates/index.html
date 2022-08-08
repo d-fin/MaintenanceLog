@@ -2,60 +2,11 @@
 {% load static %}
 {% block content %}
 
+<link rel="stylesheet" href="{% static 'css/index.css' %}">
+
+<script src="{% static 'js/index.js' %}"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<style>
-    hr.rounded {
-        border-top: 8px solid #bbb;
-        border-radius: 5px;
-    }
 
-    #taskTable {
-        overflow: auto;
-    }
-
-    .taskTable {
-        overflow: scroll;
-        height: 300px;
-        width: 400 px;
-    }
-
-    .editable {
-        height: 100px;
-        white-space: pre-line;
-    }
-    .notesTextArea{
-
-    }
-</style>
-<script type="text/javascript">
-    window.onload() = function () {
-        const element = document.getElementById('upcomingTableBody');
-        element.removeChild();
-        element.remove();
-        /* document.getElementById('behindTableRow').style.visibility = 'visible';
-        document.getElementById('upcomingTableRow').style.visibility = 'hidden'; */
-    };
-
-    function onDataSelect2() {
-        var tasks = document.getElementById('upcomingDropdown').innerHTML;
-        var table = document.getElementById('behindUpcomingTable').removeChild()
-        /*  var tasks = document.getElementById('upcomingDropdown').innerHTML;
-         console.log(tasks)
-         if(tasks == 'Upcoming'){
-             document.getElementById('behindTableRow').style.visibility = 'hidden';
-             document.getElementById('upcomingTableRow').style.visibility = 'visible';
-         } */
-    };
-
-    function onDataSelect() {
-        var tasks = document.getElementById('behindDropdown').innerHTML;
-        console.log(tasks)
-        if (tasks == 'Behind') {
-            document.getElementById('behindTableRow').style.visibility = 'visible';
-            document.getElementById('upcomingTableRow').style.visibility = 'hidden';
-        }
-    };
-</script>
 
 <!-- Start Content-->
 <div class="container-fluid">
@@ -154,14 +105,12 @@
                                                     {% for i in behind.itertuples %}
                                                     <tr>
                                                         <td>
-                                                            <h5 class="font-14 my-1"><a href="" class="text-body">{{
-                                                                    behindHeaders.2 }}</a></h5>
+                                                            <h5 class="font-14 my-1"><a href="" class="text-body">{{ behindHeaders.2 }}</a></h5>
                                                             <span class="text-muted font-13">{{ i.brushStyle }}</span>
                                                         </td>
                                                         <td>
                                                             <span class="text-muted font-13">Component</span>
-                                                            <h5 class="font-14 mt-1 font-weight-normal">{{ i.component
-                                                                }}</h5>
+                                                            <h5 class="font-14 mt-1 font-weight-normal">{{ i.component }}</h5>
                                                         </td>
                                                         <td>
                                                             <span class="text-muted font-13">Side / Set Number</span>
@@ -185,19 +134,16 @@
                                                 <tbody id="upcomingTableBody">
                                                     <tr>
                                                         <td>
-                                                            <h5 class="font-14 my-1"><a href="" class="text-body">{{
-                                                                    behindHeaders.2 }}</a></h5>
+                                                            <h5 class="font-14 my-1"><a href="" class="text-body">{{ behindHeaders.2 }}</a></h5>
                                                             <span class="text-muted font-13">{{ i.brushStyle }}</span>
                                                         </td>
                                                         <td>
                                                             <span class="text-muted font-13">Component</span>
-                                                            <h5 class="font-14 mt-1 font-weight-normal">{{ i.component
-                                                                }}</h5>
+                                                            <h5 class="font-14 mt-1 font-weight-normal">{{ i.component}}</h5>
                                                         </td>
                                                         <td>
                                                             <span class="text-muted font-13">Side / Set Number</span>
-                                                            <h5 class="font-14 mt-1 font-weight-normal">{{ i.side }} /
-                                                                {{ i.setNum }}</h5>
+                                                            <h5 class="font-14 mt-1 font-weight-normal">{{ i.side }} / {{ i.setNum }}</h5>
                                                         </td>
                                                         <td class="table-action" style="width: 90px;">
                                                             <a href="javascript: void(0);" class="action-icon"> <i
@@ -244,15 +190,7 @@
                                             <td>{{ i.1 }}</td>
                                             <td>{{ i.2 }}</td>
                                             <td>{{ i.3 }}</td>
-                                            <td>
-                                                <form method="post">
-                                                    {% csrf_token %}
-                                                    {{ form.as_p }}
-                                                    <input type="hidden" name="noteId" value="{{ i.0 }}">
-                                                    <input class="textAreaForm" type="submit" value="Save Notes"  name="saveNoteBtn">
-                                                </form>
-                                            </td>
-                                            <!-- <td class="editable" data-id="{{ i.0 }}" data-type="notes">{{ i.4 }}</td> -->
+                                            <td class="editable" data-id="{{ i.0 }}" data-type="notes">{{ i.4 }}</td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
@@ -411,9 +349,14 @@
 <script src="{% static 'assets/js/vendor/jquery-jvectormap-world-mill-en.js' %}"></script>
 
 <script>
+    function refresh_page() {
+        window.location.reload();
+        console.log("Refresh");
+    }
+
     $(document).ready(function () {
         $(document).on("click", ".editable", function () {
-            var value = $(this).text();
+            var value = $(this).val();
             var input = "<textarea type='text' class='input-data' value='" + value + "' class='form-control' rows='5' cols='50'>";
             $(this).html(input);
             $(this).removeClass("editable")
@@ -422,6 +365,7 @@
         });
         $(document).on("blur", ".input-data", function () {
             var value = $(this).val();
+            console.log(value)
             var td = $(this).parent("td");
             $(this).remove();
             td.html(value);
@@ -429,18 +373,6 @@
             var type = td.data("type");
             sendToServer(td.data("id"), value, type);
         });
-        /* $(document).on("keypress", ".input-data", function (e) {
-            var key = e.which;
-            if (key == 13) {
-                var value = $(this).val();
-                var td = $(this).parent("td");
-                $(this).remove();
-                td.html(value);
-                td.addClass("editable");
-                var type = td.data("type");
-                sendToServer(td.data("id"), value, type);
-            }
-        }); */
 
         function sendToServer(id, value, type) {
             console.log(value)
@@ -455,13 +387,14 @@
                 data: { id: id, type: type, value: value },
             })
                 .done(function (response) {
+                    refresh_page()
                     console.log(response);
                 })
                 .fail(function () {
                     console.log("Error Occured");
                 });
         }
-    });
+    }); 
 </script>
 
 {% endblock content %}

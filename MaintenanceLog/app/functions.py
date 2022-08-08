@@ -51,6 +51,7 @@ def getSpecificCompData(comp, siteCode):
 
 def getTasks(siteCode):
     brushDf = returnDataFrames(siteCode)
+    
     brushDfList = brushDf.values.tolist()
 
     compDf = returnComponentDataFrames(siteCode)
@@ -63,9 +64,9 @@ def getTasks(siteCode):
 
     today = datetime.date.today()
     thirtyDaysOut = today + relativedelta(days=30)
-    thirtyDaysOut = returnDate(thirtyDaysOut)
-    today = returnDate(today)
-
+    #thirtyDaysOut = returnDate(thirtyDaysOut)
+    today = date.today()
+    #today = returnDate(today)
     for i in brushDfList:
         k = 0
         for j in i:
@@ -73,7 +74,9 @@ def getTasks(siteCode):
             upcomingTemp = []
             dontPutInBoth = False
             if isinstance(j, datetime.date) == True:
-                j = j.strftime("%m/%d/%Y")
+                #pdb.set_trace()
+                j = j + relativedelta(months=6)
+                #j = j.strftime("%m/%d/%Y")
                 if j < today: 
                     dontPutInBoth = True
                     if k == 4:
@@ -318,30 +321,7 @@ def getMaintenanceData(siteCode):
     maintenanceData = maintenanceData.drop(maintenanceData.columns[[5]], axis=1)
     maintenanceData = maintenanceData.values.tolist()
     maintenanceData = convertTime(maintenanceData)
-    """  maintenanceData = []
-    compName = ['Takeup Drum', 'Sprocket', 'Fork Cover', 'Fork Cylinder', 'Heco Drive', 'Conveyor Hydraulic Motor', 'Chain/Rollers']
-    headers = [1, 2, 3, 4]
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT * FROM app_maintenance WHERE siteCode = " + str(siteCode))
-        
-        z = 0
-        for i in cursor: 
-            temp = {}
-            kount = 0 
-            headerCount = 0
-            temp[headers[headerCount]] = compName[z] 
-            headerCount += 1 
-            for j in i:
-                
-                if kount == 0 or kount == 1 or kount == 5: pass 
-                else:
-                    if isinstance(j, datetime.date) == True:
-                         j = j.strftime("%m/%d/%Y")
-                    temp[headers[headerCount]] = j
-                    headerCount += 1
-                kount += 1
-            maintenanceData.append(temp)
-            z += 1 """
+    
     return maintenanceData
 
 def getInventoryData(siteCode):

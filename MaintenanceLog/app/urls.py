@@ -7,7 +7,6 @@ urlpatterns = [
     path('login/', views.loginUser, name='login'),
     path('logout/', views.logoutUser, name='logout'),
     path('profile/', views.userAccount, name="profile"),
-    path('add_brush',views.addBrush, name='add_brush'),
     path('update_schedule', views.updateSchedule, name='update_schedule'),
     path('updateNotes', views.updateNotes, name="updateNotes"),
     path('saveSchedule', views.saveSchedule, name="saveSchedule"),
@@ -15,4 +14,5 @@ urlpatterns = [
     path('inventory_details', views.inventory_details, name='inventory_details'),
     path('saveInventory', views.saveInventory, name='saveInventory'),
     path('edit_profile', views.edit_profile, name='edit_profile'),
+    path('calendar', views.calendar, name='calendar'),
 ]

@@ -1,12 +1,10 @@
-from datetime import timedelta
-from email.message import Message
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.db import connection
 from django.contrib.auth.admin import * 
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout 
-from .forms import CreateUserForm, DropdownMenuForm, updateCompValueForm, editProfileForm, updateTimeForm, textAreaForm
+from .forms import CreateUserForm, DropdownMenuForm, updateCompValueForm, editProfileForm
 from django.contrib.auth.decorators import login_required
 from django.db.models import Max
 import pdb
@@ -18,6 +16,7 @@ import plotly.graph_objs as go
 from plotly.offline import plot
 import pandas as pd 
 from dateutil.relativedelta import relativedelta
+from calendar import HTMLCalendar
 
 
 from app.functions import *
@@ -48,7 +47,8 @@ def home(request):
 
     df = returnDataFrames(siteCode)
     df1 = df.values.tolist()
-    today = datetime.date.today().strftime("%m/%d/%Y")
+    #today = datetime.date.today().strftime("%m/%d/%Y")
+    today = date.today()
     total, pastDay = 0, 0
     for i in df1:
         for j in i:
@@ -57,7 +57,8 @@ def home(request):
                     pastDay += 1
                     total += 1
                 else:
-                    j = j.strftime("%m/%d/%Y")
+                    #j = j.strftime("%m/%d/%Y")
+                    j = j + relativedelta(months=6)
                     if j < today: 
                         pastDay += 1
                         total += 1
@@ -73,18 +74,7 @@ def home(request):
 
     behindCount = behind.shape[0]
     upcomingCount = upcoming.shape[0]
-
-    if request.method == "POST":
-        form = textAreaForm(request.POST)
-        if form.is_valid():
-            data = form.cleaned_data.get('notes')
-            id = request.POST.get('noteId', '')
-            x = Maintenance.objects.get(id=int(id))
-            x.notes = data 
-            x.save()
-    else:
-        form = textAreaForm()
-
+ 
     context = {
         'df' : maintenanceData,
         'curtains' : curtains,
@@ -100,7 +90,7 @@ def home(request):
         'behindCount' : behindCount,
         'upcoming' : upcoming,
         'upcomingCount' : upcomingCount,
-        'form' : form
+        
     }
 
     return render(request, 'index.html', context)
@@ -250,6 +240,23 @@ def update_inventory(request):
     }
     return render(request, 'update_inventory.html', context)
 
+
+
+# BELOW FUNCTIONS ARE NOT BEING USED CURRENTLY - WILL ADD FUNCTIONALITY AT FUTURE DATE.
+# REMOVED FROM LEFT SIDE BAR - <li> ITEMS ARE COMMENTED OUT IN HTML.
+# ------------------------------------------------------------------------------------
+@login_required
+def calendar(request):
+    now = datetime.datetime.now()
+    year = now.year 
+    month = now.month 
+    cal = HTMLCalendar().formatmonth(year, month, withyear=True)
+    
+    context = {
+        'calendar' : cal,
+    }
+    return render(request, 'calendar.html', context)
+
 @login_required
 def inventory_details(request):
     siteCode = request.session.get('siteCode', '')
@@ -271,47 +278,16 @@ def inventory_details(request):
     bar_plot = plot(fig, output_type='div')
     # end bar graph quantities
 
-    # gantt plot 
-    """ componentData = Maintenance.objects.filter(siteCode=siteCode, dateReplaced__isnull=False)
-     
-    data = [
-        {
-            'comp' : x.component,
-            'dateReplaced' : x.dateReplaced.strftime("%Y/%m/%d"),
-            'dueDate' : (x.dateReplaced + datetime.timedelta(months=6)).strftime("%Y/%m/%d")
-        } for x in componentData ]
-    pdb.set_trace()
-    df = pd.DataFrame(data)
-    fig = px.timeline(
-        df, x_start="dateReplaced", 
-        x_end="dueDate",
-        y="comp",
-        color="comp"
-    )
-    fig.update_yaxes(autorange="reversed")
-    gannt_plot = plot(fig, output_type='div') """
-
-    # end gantt plot 
-
     context = {
         'barPlot' : bar_plot,
         #'gantt' : gannt_plot,
     }
     return render(request, 'inventory_details.html', context)
 
-def addBrush(request):
-    form = DropdownMenuForm()
-    if request.method == 'POST':        
-        form = DropdownMenuForm(request.POST)
-        if form.is_valid():
-            data = form.cleaned_data.get('brushType')
-            return redirect('home')
+# ------------------------------------------------------------------------------------
 
-    context = {
-        'form' : form
-    } 
-    
-    return render(request, 'add_brush.html', context)
+# BELOW IS USER LOGIN/LOGOUT/REGISTER FUNCTIONALITY 
+# ------------------------------------------------------------------------------------
 
 #User register page
 def register(request):
@@ -431,8 +407,10 @@ def edit_profile(request):
         'form' : form
     }
     return render(request, 'edit_profile.html', context)
+# ------------------------------------------------------------------------------------
+# END USER ACCOUNT/LOGIN FUNCTIONS 
 
-#---------------------------------------
+# ------------------------------------------------------------------------------------
 # Below are my ajax/json parsers that recieve data from my table in "Update Schedule"/"Update Inventory"
 def saveInventory(request):
     siteCode = request.session['siteCode']
@@ -472,7 +450,9 @@ def updateNotes(request):
     type = request.POST.get("type", '')
     if type == 'notes':
         compData = Maintenance.objects.get(id=id)
-        compData.notes = value 
+        currentNotes = str(compData.notes) 
+        allNotes = currentNotes + "\n" + value
+        compData.notes = allNotes 
         compData.save()
 
     return JsonResponse({"success" : "Updated"})

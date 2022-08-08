@@ -1,0 +1,19 @@
+hr.rounded {
+    border-top: 8px solid #bbb;
+    border-radius: 5px;
+}
+
+#taskTable {
+    overflow: auto;
+}
+
+.taskTable {
+    overflow: scroll;
+    height: 300px;
+    width: 400 px;
+}
+
+.editable {
+    height: 100px;
+    white-space: pre-line;
+}

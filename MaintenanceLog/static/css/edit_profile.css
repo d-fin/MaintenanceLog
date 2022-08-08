@@ -1,0 +1,44 @@
+hr.rounded {
+    border-top: 8px solid #bbb;
+    border-radius: 5px;
+}
+hr.block{
+    border-top: 2px solid #bbb;
+    border-radius: 2px;
+}
+.dropdownMenu {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 2em;
+    line-height: 3;
+    overflow: hidden;
+    border-radius: .25em;
+    padding-bottom: 10px;
+}
+.text-box-form{
+    font-family: 'Roboto', sans-serif;
+    color: #333;
+    font-size: 1.5rem;
+    margin: 0 auto;
+    padding: 1.5rem 2rem;
+    border-radius: 0.2rem;
+    background-color: rgb(255, 255, 255);
+    border: none;
+    height: 20px;
+    width: 100%;
+    display: block;
+    border-bottom: 0.3rem solid 
+}
+.label{
+    font-family: 'Roboto', sans-serif;
+    font-size: 1rem;
+    margin-left: 2rem;
+    margin-top: 0.7rem;
+    display: block;
+    transition: all 0.3s;
+    transform: translateY(0rem);
+}
+#submit-button{
+    width: 100%;
+}
