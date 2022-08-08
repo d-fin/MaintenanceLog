@@ -1,22 +1,27 @@
 # MaintenanceLog
-David Finley 
-Description: An app that keep tracks of maintenance schedules and inventory logs. 
+# David Finley 
+
+- Description: An app that keep tracks of maintenance schedules and inventory logs. 
+- Install instructions are for Ubuntu Linux. Most commands will work on macOS with minor tweaks. 
 
 # Installation Instructions 
+# ---------------------------------------------------------------------------------------------------
+# Install mySQL Server and create database 
 
-# Install mysql
+- Install 
+
     ```
-    sudo apt install mysql-server
+    sudo apt-get install mysql-server
     ```
 
-- create database 
+- Create database 
 
     ```
     $ mysql -u root -p
     mysql> CREATE database maintenancelog;
     ```
   
-- navigate to sql file location 
+- Navigate to sql file location 
 
     ```
     $ mysql -u root -p maintenancelog < maintenancelog.sql
@@ -30,7 +35,8 @@ Description: An app that keep tracks of maintenance schedules and inventory logs
     mysql> FLUSH PRIVILEGES;
     ```
 
-# Install virtual enviornment 
+# ---------------------------------------------------------------------------------------------------
+# Install/create virtual enviornment 
 
     ```
     $ sudo apt install virtualenv -y
@@ -49,14 +55,22 @@ Description: An app that keep tracks of maintenance schedules and inventory logs
     $ source bin/activate 
     ```
 
-# Install python dependencies 
+# ---------------------------------------------------------------------------------------------------
+# Install python + python dependencies 
 
-- Navigate to "requirements.txt" file location
+- Install python 
 
     ```
-    $ python3 install -r requirements.txt
+    (env)$ sudo apt-get install python3
     ```
 
+- Navigate to "requirements.txt" file location (make sure pip is up to date)
+
+    ```
+    (env)$ python3 install -r requirements.txt
+    ```
+
+# ---------------------------------------------------------------------------------------------------
 # Running the test server 
 
 - Make DB migrations 
@@ -72,4 +86,5 @@ Description: An app that keep tracks of maintenance schedules and inventory logs
     (env)$ python3 manage.py runserver 
     ```
 
+# ---------------------------------------------------------------------------------------------------
 # Deploy
