@@ -11,8 +11,10 @@ urlpatterns = [
     path('updateNotes', views.updateNotes, name="updateNotes"),
     path('saveSchedule', views.saveSchedule, name="saveSchedule"),
     path('update_inventory', views.update_inventory, name="update_inventory"),
-    path('inventory_details', views.inventory_details, name='inventory_details'),
+    #path('inventory_details', views.inventory_details, name='inventory_details'),
     path('saveInventory', views.saveInventory, name='saveInventory'),
     path('edit_profile', views.edit_profile, name='edit_profile'),
-    path('calendar', views.calendar, name='calendar'),
+    #path('calendar', views.calendar, name='calendar'),
+    path('update_hydraulic_hose_schedule', views.update_hydraulic_hose_schedule, name='update_hydraulic_hose_schedule'),
+    path('saveHydrHoseDate', views.saveHydrHoseDate, name='saveHydrHoseDate'),
 ]

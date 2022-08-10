@@ -5,6 +5,7 @@ from dateutil.relativedelta import relativedelta
 
 today = date.today()
 defaultFixDay = (today) + relativedelta(months=6)
+defaultFixHoseDay = (today) + relativedelta(months=3)
 
 # Create your models here.
 class Employee(models.Model):
@@ -52,3 +53,10 @@ class Inventory(models.Model):
     modelNumber = models.CharField(max_length=50, null=True)
     quantity = models.IntegerField(null=False)
     siteCode = models.IntegerField() 
+
+class HydraulicHoses(models.Model):
+    id = models.IntegerField(primary_key=True)
+    brushID = models.IntegerField()
+    dateReplaced = models.DateField('%mm/%dd/%yyyy', default=today)
+    dueDate = models.DateField('%mm/%dd/%yyyy', default=defaultFixHoseDay)
+    siteCode = models.IntegerField()

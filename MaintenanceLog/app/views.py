@@ -1,27 +1,25 @@
-from email.policy import default
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
-from django.db import connection
 from django.contrib.auth.admin import * 
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout 
-from .forms import CreateUserForm, DropdownMenuForm, updateCompValueForm, editProfileForm
+from .forms import CreateUserForm, updateCompValueForm, editProfileForm
 from django.contrib.auth.decorators import login_required
 from django.db.models import Max
-import pdb
 
+import pdb
 from dateutil import parser
-import numpy as np 
 import plotly.express as px 
 import plotly.graph_objs as go
 from plotly.offline import plot
 import pandas as pd 
 from dateutil.relativedelta import relativedelta
-from calendar import HTMLCalendar
-
 
 from app.functions import *
 # Create your views here.
+
+# MAIN PAGES 
+# ------------------------------------------------------------------------------------
 
 #home page
 @login_required 
@@ -37,7 +35,6 @@ def home(request):
             siteCode = int(changeSite)
         request.session['siteCode'] = siteCode
     
-    
     maintenanceData = getMaintenanceData(siteCode)
     brushData = getBrushData(siteCode)
 
@@ -48,7 +45,6 @@ def home(request):
 
     df = returnDataFrames(siteCode)
     df1 = df.values.tolist()
-    #today = datetime.date.today().strftime("%m/%d/%Y")
     today = date.today()
     total, pastDay = 0, 0
     for i in df1:
@@ -58,7 +54,6 @@ def home(request):
                     pastDay += 1
                     total += 1
                 else:
-                    #j = j.strftime("%m/%d/%Y")
                     j = j + relativedelta(months=6)
                     if j < today: 
                         pastDay += 1
@@ -75,6 +70,10 @@ def home(request):
 
     behindCount = behind.shape[0]
     upcomingCount = upcoming.shape[0]
+
+    email = request.user.email 
+    username = request.user.username 
+    #sendBrushUpdateEmail(username, email, siteCode)
  
     context = {
         'df' : maintenanceData,
@@ -241,13 +240,50 @@ def update_inventory(request):
     }
     return render(request, 'update_inventory.html', context)
 
+@login_required
+def update_hydraulic_hose_schedule(request):
+    siteCode = request.session.get('siteCode', '')
+    if siteCode == '': siteCode = 1 
+        
+    wrap, side, rocker = getHydraulicHoseData(siteCode)
+    wrap = wrap.values.tolist()
+    side = side.values.tolist()
+    rocker = rocker.values.tolist()
 
+    for i in wrap: 
+        x = returnDate(i[2])
+        i[2] = x 
+        y = returnDate(i[3])
+        i[3] = y 
+    
+    for i in side: 
+        x = returnDate(i[2])
+        i[2] = x 
+        y = returnDate(i[3])
+        i[3] = y 
+
+    for i in rocker: 
+        x = returnDate(i[2])
+        i[2] = x 
+        y = returnDate(i[3])
+        i[3] = y 
+    
+    headers = ['Side', 'Set #', 'Date Replaced', 'Suggested Due Date']
+    context = {
+        'wrap' : wrap,
+        'side' : side, 
+        'rocker' : rocker,
+        'headers' : headers,
+    }
+    return render(request, 'update_hydraulic_hose_schedule.html', context)
+
+# ------------------------------------------------------------------------------------
 
 # BELOW FUNCTIONS ARE NOT BEING USED CURRENTLY - WILL ADD FUNCTIONALITY AT FUTURE DATE.
 # REMOVED FROM LEFT SIDE BAR - <li> ITEMS ARE COMMENTED OUT IN HTML.
 # ------------------------------------------------------------------------------------
-@login_required
-def calendar(request):
+"""@login_required
+ def calendar(request):
     now = datetime.datetime.now()
     year = now.year 
     month = now.month 
@@ -283,7 +319,7 @@ def inventory_details(request):
         'barPlot' : bar_plot,
         #'gantt' : gannt_plot,
     }
-    return render(request, 'inventory_details.html', context)
+    return render(request, 'inventory_details.html', context) """
 
 # ------------------------------------------------------------------------------------
 
@@ -303,6 +339,7 @@ def register(request):
             id = userInfo[0]['id']
             newEmployee = Employee.objects.create(user_id=id)
             newEmployee.save()
+            sendNewUserEmail(id)
             messages.success(request, 'Account was created for ' + user)
             return redirect('login')
 
@@ -412,7 +449,32 @@ def edit_profile(request):
 # END USER ACCOUNT/LOGIN FUNCTIONS 
 
 # ------------------------------------------------------------------------------------
-# Below are my ajax/json parsers that recieve data from my table in "Update Schedule"/"Update Inventory"
+# Below are my ajax/json parsers that recieve data from my table in "Update Schedule"/"Update Inventory/etc"
+
+def saveHydrHoseDate(request):
+    id = request.POST.get('id', '')
+    value = request.POST.get('value', '')
+    type = request.POST.get("type", '')
+
+    dateString, day, month, year = None, None, None, None
+    if type == "dateReplaced":
+        try: 
+            data = value.split("/")
+            month = data[0]
+            day = data[1] 
+            year = data[2] 
+        except Exception as e: 
+            dateString = value
+        else: dateString = year + "/" + month + "/" + day
+        finally: 
+            value = parser.parse(dateString)
+    if type == 'dateReplaced':
+        obj = HydraulicHoses.objects.get(id=id)
+        obj.dateReplaced = value 
+        obj.save()
+
+    return JsonResponse({"success" : "Updated"})
+
 def saveInventory(request):
     siteCode = request.session['siteCode']
     delete = request.POST.get('delete', '')
@@ -519,3 +581,5 @@ def saveSchedule(request):
             brushComp.save()
 
     return JsonResponse({"success" : "Updated"})
+
+# ------------------------------------------------------------------------------------

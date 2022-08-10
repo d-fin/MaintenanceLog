@@ -1,0 +1,16 @@
+Hello {{ adminName }}
+
+There was a new user that signed up to use the Maintenance Log! 
+If you do not recognize the user and do not wish them to have access to the site, please contact your admin to have the user removed.
+
+Admin - David Finley 
+Forward this email to 'dfinley5656@gmail.com' with any relevant data on the new user. 
+ 
+Below is the information of the new user. 
+{% for i in user.itertuples %}
+    Username:                    {{ i.1 }}
+    Email:                           {{ i.2 }}
+    Date/Time Registered: {{ i.3 }}
+{% endfor%}
+Sincerely,
+The Maintenance Log 

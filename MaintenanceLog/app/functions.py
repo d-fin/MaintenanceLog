@@ -1,9 +1,70 @@
+from django.core.mail import EmailMessage
+from django.conf import settings 
+from django.template.loader import render_to_string
+
 import pdb
 import pandas as pd 
 from django.db import connection
 import datetime
 from .models import * 
 from dateutil.relativedelta import relativedelta
+
+def sendNewUserEmail(newUserID):
+    newUser = User.objects.all().values().filter(id=newUserID)
+    newUserData = [newUser[0]['username'], newUser[0]['email'], newUser[0]['date_joined']]
+    df = pd.DataFrame([newUserData], columns=['username', 'email', 'datejoined'])
+
+    admin = User.objects.all().values_list('username', 'email').filter(id=17)
+    adminName = admin[0][0]
+    adminEmail = admin[0][1]
+
+    template = render_to_string('email_newUser.html', context = {'user' : df, 'adminName' : adminName})
+    email = EmailMessage(
+        'New User Alert!',
+        template,
+        settings.EMAIL_HOST_USER,
+        [adminEmail]
+    )
+     # in production set fail_silently=True
+    email.fail_silently = False 
+    email.send()
+
+def getHydraulicHoseData(siteCode):
+    brushStyles = pd.DataFrame(list(Brush.objects.all().values_list('brushStyle').distinct()))
+    brushStyles = brushStyles.values.tolist()
+    brushStyles = [x[0] for x in brushStyles]
+
+    x = {}
+    for i in brushStyles:
+        if i != 'Curtain':
+            brush = pd.DataFrame(Brush.objects.all().values_list('id').filter(brushStyle=i).filter(siteCode=siteCode))
+            brush = brush.values.tolist()
+            brush = [x[0] for x in brush]
+            x[i] = brush
+
+    wrap, side, rocker = None, None, None 
+    for key, val in x.items():
+        if key == 'Wrap Brush':
+            brushDf = pd.DataFrame(list(Brush.objects.all().values().filter(brushStyle=key).filter(siteCode=siteCode)))
+            hydrHoseDf = pd.DataFrame(list(HydraulicHoses.objects.all().values().filter(brushID__in=val)))
+            brushDf.rename(columns={'id':'brushID'}, inplace=True)
+            wrap = pd.merge(hydrHoseDf, brushDf, on='brushID', how='left')
+        if key == 'Side Washer':
+            brushDf = pd.DataFrame(list(Brush.objects.all().values().filter(brushStyle=key).filter(siteCode=siteCode)))
+            hydrHoseDf = pd.DataFrame(list(HydraulicHoses.objects.all().values().filter(brushID__in=val)))
+            brushDf.rename(columns={'id':'brushID'}, inplace=True)
+            side = pd.merge(hydrHoseDf, brushDf, on='brushID', how='left')
+        if key == 'Rocker Brush':
+            brushDf = pd.DataFrame(list(Brush.objects.all().values().filter(brushStyle=key).filter(siteCode=siteCode)))
+            hydrHoseDf = pd.DataFrame(list(HydraulicHoses.objects.all().values().filter(brushID__in=val)))
+            brushDf.rename(columns={'id':'brushID'}, inplace=True)
+            rocker = pd.merge(hydrHoseDf, brushDf, on='brushID', how='left')
+
+    wrap.drop(['siteCode_x', 'siteCode_y', 'brushStyle'], axis=1, inplace=True)
+    rocker.drop(['siteCode_x', 'siteCode_y', 'brushStyle'], axis=1, inplace=True)
+    side.drop(['siteCode_x', 'siteCode_y', 'brushStyle'], axis=1, inplace=True)
+    
+    return wrap, side, rocker
 
 def getSpecificCompData(comp, siteCode):
     brushes =  ['Curtain', 'Rocker Brush', 'Wrap Brush', 'Side Washer']
@@ -64,9 +125,7 @@ def getTasks(siteCode):
 
     today = datetime.date.today()
     thirtyDaysOut = today + relativedelta(days=30)
-    #thirtyDaysOut = returnDate(thirtyDaysOut)
     today = date.today()
-    #today = returnDate(today)
     for i in brushDfList:
         k = 0
         for j in i:
@@ -74,9 +133,7 @@ def getTasks(siteCode):
             upcomingTemp = []
             dontPutInBoth = False
             if isinstance(j, datetime.date) == True:
-                #pdb.set_trace()
                 j = j + relativedelta(months=6)
-                #j = j.strftime("%m/%d/%Y")
                 if j < today: 
                     dontPutInBoth = True
                     if k == 4:

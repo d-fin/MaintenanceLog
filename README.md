@@ -88,5 +88,10 @@
     (env)$ python3 manage.py runserver 
     ```
 
+- Start redis server
+    ```
+    (env)$ brew services start redis
+    (env)$ MaintenanceLog % celery -A MaintenanceLog worker -l info
+    ```
 # ---------------------------------------------------------
 # Deploy

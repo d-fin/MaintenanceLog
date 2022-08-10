@@ -1,0 +1,15 @@
+Hello {{ name }}!
+
+There is equipment that needs your attention soon! :)
+
+Below is a list of brushes that have outdated components or have a component that needs an updating soon. :)
+ 
+{% for i in df.itertuples %}
+    {{ i.1 }}
+    {{ i.2 }}       
+    {{ i.3 }}       Date component was last replaced: {{ i.4 }}
+    -------------------------------------------------------------------
+{% endfor %}
+
+Sincerely, 
+The Maintenace Log
