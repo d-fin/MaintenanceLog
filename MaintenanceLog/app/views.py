@@ -333,14 +333,31 @@ def register(request):
         id = None 
         form = CreateUserForm(request.POST)
         if form.is_valid():
-            form.save()
-            user = form.cleaned_data.get('username')
-            userInfo = User.objects.all().values().filter(username=user)
+            first_name = form.cleaned_data.get('first_name')
+            last_name = form.cleaned_data.get('last_name')
+            first_name = str(first_name).capitalize()
+            last_name = str(last_name).capitalize()
+            email = form.cleaned_data.get('email')
+            emailCopy = email 
+            emailCopy = emailCopy.split("@")
+            username = emailCopy[0]
+            
+            newUser = User()
+            newUser.first_name = first_name 
+            newUser.last_name = last_name 
+            newUser.email = email 
+            newUser.password = form.cleaned_data.get('password1')
+            newUser.username = username 
+            newUser.is_staff = 1
+            
+            newUser.save()
+            
+            userInfo = User.objects.all().values().filter(username=username)
             id = userInfo[0]['id']
             newEmployee = Employee.objects.create(user_id=id)
             newEmployee.save()
             sendNewUserEmail(id)
-            messages.success(request, 'Account was created for ' + user)
+            
             return redirect('login')
 
     context = {
@@ -352,8 +369,10 @@ def register(request):
 #User login page 
 def loginUser(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
+        email = request.POST.get('username')
         password = request.POST.get('password')
+        user = User.objects.all().values_list('username').filter(email=email)
+        username= user[0][0]
         user = authenticate(request, username = username, password = password)
         siteCode = None 
         if user is not None:
@@ -510,12 +529,19 @@ def updateNotes(request):
     id = request.POST.get('id', '')
     value = request.POST.get('value', '')
     type = request.POST.get("type", '')
-    if type == 'notes':
+    delete = request.POST.get('delete', '')
+
+    if delete == "True":
         compData = Maintenance.objects.get(id=id)
-        currentNotes = str(compData.notes) 
-        allNotes = currentNotes + "\n" + value
-        compData.notes = allNotes 
+        compData.notes = "Enter notes here"
         compData.save()
+    else:  
+        if type == 'notes':
+            compData = Maintenance.objects.get(id=id)
+            currentNotes = str(compData.notes) 
+            allNotes = currentNotes + "\n" + value
+            compData.notes = allNotes 
+            compData.save()
 
     return JsonResponse({"success" : "Updated"})
 

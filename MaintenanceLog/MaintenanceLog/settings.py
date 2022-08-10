@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'app',
     'bootstrap4',
     'chartjs',
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [

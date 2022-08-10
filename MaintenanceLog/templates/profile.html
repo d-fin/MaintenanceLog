@@ -13,21 +13,21 @@
                         <div class="col-lg-2"></div>
                         <div class="col-lg-8">
                             <div class="d-flex justify-content-center">
-                                {% if user.get_first_name %}
-                                <h1>{{ user.get_first_name }}'s Profile</h1>
+                                {% if user.get_full_name %}
+                                <h1>{{ user.get_full_name }}'s Profile</h1>
                                 {% else %}
                                 <h1>Profile</h1>
                                 {% endif %}
                             </div>
                         </div>
-                        <div class="col-lg-2"><br>
+                        <!-- <div class="col-lg-2"><br>
                             <div class="d-flex justify-content-center">
                                 <form action="{% url 'profile' %}" method="post">
                                     {% csrf_token %}
                                     <button type="submit" class="btn btn-primary" value="edit" name="edit">Edit Profile</button>
                                 </form>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                     <div class="row">
                         <div class="col-lg-2"></div>

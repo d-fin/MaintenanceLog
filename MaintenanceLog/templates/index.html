@@ -190,6 +190,9 @@
                                             <td>{{ i.2 }}</td>
                                             <td>{{ i.3 }}</td>
                                             <td class="editable" data-id="{{ i.0 }}" data-type="notes">{{ i.4 }}</td>
+                                            <td id="{{ i.0 }}">
+                                                <button type="button" class="btn btn-danger" onclick="clear_notes(this)">Clear Notes</button>
+                                            </td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
@@ -347,6 +350,34 @@
 <script src="{% static 'assets/js/vendor/jquery-jvectormap-world-mill-en.js' %}"></script>
 
 <script>
+    function clear_notes(x) {
+        var rowDataId = x.parentNode.id;
+        var type = "notes";
+        console.log(rowDataId);
+        sendToServer(rowDataId, type, "")
+
+        function sendToServer(id, value, type) {
+            console.log(value)
+            console.log(type)
+            console.log(id)
+            $.ajax({
+                url: "http://127.0.0.1:8000/updateNotes",
+                type: "POST",
+                beforeSend: function (xhr, settings) {
+                    xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+                },
+                data: { id: id, type: type, value: value, delete: "True" },
+            })
+                .done(function (response) {
+                    refresh_page()
+                    console.log(response);
+                })
+                .fail(function () {
+                    console.log("Error Occured");
+                });
+        }
+    }
+
     function refresh_page() {
         window.location.reload();
         console.log("Refresh");

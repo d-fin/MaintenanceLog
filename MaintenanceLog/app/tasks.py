@@ -6,14 +6,14 @@ from django.template.loader import render_to_string
 from .models import * 
 from .functions import getTasks
 
-""" @periodic_task(
-    run_every=(crontab(hours=6, minutes=0)),
-    name='scheduled_email',
+from celery import shared_task
 
-) """
-def sendBrushUpdateEmail(username, email, siteCode):
+
+@shared_task
+def sendBrushUpdateEmail():
     #----------------------------------------------
     # email testing 
+    siteCode = 1
     admin = User.objects.all().values_list('username', 'email').filter(id=17)
     adminUsername = admin[0][0]
     adminEmail = admin[0][1]

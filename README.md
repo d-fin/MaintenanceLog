@@ -89,9 +89,16 @@
     ```
 
 - Start redis server
+
     ```
     (env)$ brew services start redis
     (env)$ MaintenanceLog % celery -A MaintenanceLog worker -l info
+    ```
+
+- Activate celery-beat to perform tasks 
+
+    ```
+    (env)$ celery -A MaintenanceLog beat -l info
     ```
 # ---------------------------------------------------------
 # Deploy

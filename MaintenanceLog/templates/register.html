@@ -12,8 +12,12 @@
                     <form method="POST" action="">
                         {% csrf_token %}
                         <div class="form-group">
-                            <label for="fullname">Username</label><br>
-                            {{form.username}}
+                            <label for="fullname">First name</label><br>
+                            {{form.first_name}}
+                        </div>
+                        <div class="form-group">
+                            <label for="fullname">Last name</label><br>
+                            {{form.last_name}}
                         </div>
                         <div class="form-group">
                             <label for="emailaddress">Email address</label><br>
@@ -34,10 +38,12 @@
                         </div>
                     </form>
                 </div>
-                {{form.errors}}
                 <div class="d-flex justify-content-center">
                     <p class="text-muted">Already have account? <a href="{% url 'login' %}"
                             class="text-muted ml-1"><b>Log In</b></a></p>
+                </div><br>
+                <div class="d-flex justify-content-center">
+                    {{ form.errors }}
                 </div>
             </div>
 

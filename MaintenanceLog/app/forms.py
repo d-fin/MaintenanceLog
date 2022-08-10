@@ -1,12 +1,17 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Maintenance
+from .models import Maintenance, User
 from django import forms 
 
 class CreateUserForm(UserCreationForm):
+    #username = forms.CharField(required=False)
+    first_name = forms.CharField(required=True)
+    last_name = forms.CharField(required=True)
+    email = forms.EmailField(required=True)
+    
     class Meta:
         model = User 
-        fields = ['username', 'email', 'password1', 'password2']
+        fields = ['first_name', 'last_name', 'email', 'password1', 'password2']
 
 class DropdownMenuForm(forms.Form):
     brushType = forms.CharField(max_length=10, help_text="Enter the type of brush: ")
@@ -41,6 +46,11 @@ class updateTimeForm(forms.Form):
     )
 
 class editProfileForm(forms.Form):
+    """  def __init__(self, *args, **kwargs):
+        self.userID = kwargs.pop('userID', None)
+        user = User.objects.all().values_list('first_name', 'last_name', 'email', 'username').filter(id=self.userID)
+        super.__init__(*args, **kwargs)
+    """
     name = forms.CharField(label="Name", max_length=50, widget=forms.TextInput(
              attrs={'class' : 'text-box-form',
                     'placeholder' : 'Full name' 
@@ -66,15 +76,4 @@ class editProfileForm(forms.Form):
              attrs={'class' : 'dropdownMenu'}
     ))
 
-""" class textAreaForm(forms.Form):
-    notes = forms.CharField(label=False,
-        widget=forms.Textarea(
-            attrs={'class' : 'notesTextArea',
-                'rows' : 5,
-                'cols' : 50 
-            }
-        )
-    )
-    class Meta:
-        model = Maintenance
-        fields = ['notes'] """
+    
