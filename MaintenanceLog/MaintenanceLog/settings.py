@@ -1,6 +1,9 @@
 import os 
 import datetime 
 
+# python3 manage.py check --deploy
+
+
 """
 Django settings for MaintenanceLog project.
 
@@ -34,7 +37,7 @@ DEBUG =  config('DEBUG', cast=bool)
 # SECURITY WARNING: don't run with debug turned on in production!
 
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [config('ALLOWED_HOSTS')]
 
 
 # Application definition
@@ -92,11 +95,11 @@ WSGI_APPLICATION = 'MaintenanceLog.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'maintenancelog',
-        'USER': 'djangouser',
-        'PASSWORD': 'password',
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST'),
+        'PORT': config('DB_PORT'),
     }
 }
 
@@ -158,12 +161,18 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #SMTP config 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587 
-EMAIL_USE_TLS = True 
+EMAIL_PORT = config('EMAIL_PORT', cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool)
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD =  config('EMAIL_HOST_USER_PASSWORD')
 
 #celery 
-CELERY_BROKER_URL = 'redis://localhost:6379'
+CELERY_BROKER_URL = config('CELERY_BROKER_URL')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
+
+#DEPLOY SETTINGS 
+#SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', cast=bool)
+SESSION_COOKIE_SECURE = config('SESSION_COOKIE_SECURE', cast=bool)
+CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', cast=bool)
+#SECURE_HSTS_SECONDS=config('SECURE_HSTS_SECONDS', cast=int)

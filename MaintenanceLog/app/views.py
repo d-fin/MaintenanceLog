@@ -1,4 +1,4 @@
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.admin import * 
 from django.contrib import messages
@@ -369,22 +369,27 @@ def register(request):
 #User login page 
 def loginUser(request):
     if request.method == 'POST':
+        
         email = request.POST.get('username')
         password = request.POST.get('password')
-        user = User.objects.all().values_list('username').filter(email=email)
-        username= user[0][0]
-        user = authenticate(request, username = username, password = password)
-        siteCode = None 
-        if user is not None:
-            login(request, user)
-            id = user.id 
-            emp = Employee.objects.all().values().filter(user_id=id)
-            siteCode = emp[0]['site']
-            request.session['siteCode'] = siteCode
-            return redirect('home')
+
+        if '@' not in email: 
+            pass
         else:
-            messages.error(request, "Error logging in")
-  
+            user = User.objects.all().values_list('username').filter(email=email)
+            username= user[0][0]
+            user = authenticate(request, username = username, password = password)
+            siteCode = None 
+            if user is not None:
+                login(request, user)
+                id = user.id 
+                emp = Employee.objects.all().values().filter(user_id=id)
+                siteCode = emp[0]['site']
+                request.session['siteCode'] = siteCode
+                return redirect('home')
+            else:
+                messages.error(request, "Error logging in")
+        
     return render(request, 'login.html')
 
 # user logout page

@@ -3,9 +3,16 @@ from django.contrib.auth.models import User
 from datetime import date 
 from dateutil.relativedelta import relativedelta
 
-today = date.today()
+""" today = date.today()
 defaultFixDay = (today) + relativedelta(months=6)
-defaultFixHoseDay = (today) + relativedelta(months=3)
+defaultFixHoseDay = (today) + relativedelta(months=3) """
+
+from django.utils import timezone
+
+today = timezone.now()
+defaultFixDay = today + timezone.timedelta(days=180)
+defaultFixHoseDay = today + timezone.timedelta(days=90)
+
 
 # Create your models here.
 class Employee(models.Model):
