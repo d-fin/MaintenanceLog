@@ -10,14 +10,17 @@ from .models import *
 from dateutil.relativedelta import relativedelta
 
 def sendNewUserEmail(newUserID):
-    newUser = User.objects.all().values().filter(id=newUserID)
+    """ newUser = User.objects.all().values().filter(id=newUserID)
     newUserData = [newUser[0]['username'], newUser[0]['email'], newUser[0]['date_joined']]
     df = pd.DataFrame([newUserData], columns=['username', 'email', 'datejoined'])
 
     admin = User.objects.all().values_list('username', 'email').filter(id=17)
     adminName = admin[0][0]
     adminEmail = admin[0][1]
-
+    """
+    df = pd.DataFrame(User.objects.all().values().filter(id=newUserID))
+    adminName = 'David Finley'
+    adminEmail = 'dfinley5656@gmail.com'
     template = render_to_string('email_newUser.html', context = {'user' : df, 'adminName' : adminName})
     email = EmailMessage(
         'New User Alert!',
@@ -311,7 +314,7 @@ def getBrushData(siteCode):
         brushData = []
         headers = ['brushId', 'motor', 'shaft', 'bearings', 'upperBearings', 'cloth', 'shocks']
         with connection.cursor() as cursor:
-            cursor.execute("SELECT brushID, motor, shaft, bearings, upperBearings, cloth, shocks FROM app_brushComponent WHERE siteCode = " + str(siteCode))
+            cursor.execute("SELECT brushID, motor, shaft, bearings, upperBearings, cloth, shocks FROM app_brushcomponent WHERE siteCode = " + str(siteCode))
             for data in cursor:
                 temp = {}
                 i = 0 

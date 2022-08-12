@@ -342,7 +342,7 @@ def register(request):
             emailCopy = emailCopy.split("@")
             username = emailCopy[0]
             
-            newUser = User()
+            """ newUser = User()
             newUser.first_name = first_name 
             newUser.last_name = last_name 
             newUser.email = email 
@@ -350,10 +350,12 @@ def register(request):
             newUser.username = username 
             newUser.is_staff = 1
             
-            newUser.save()
-            
-            userInfo = User.objects.all().values().filter(username=username)
-            id = userInfo[0]['id']
+            newUser. """
+            password = form.cleaned_data.get('password1')
+            newUser = User.objects.create_user(username=username, email=email, password=password, first_name=first_name, last_name=last_name)
+   
+            userInfo = User.objects.all().values_list('id', flat=True).filter(username=username)
+            id = userInfo[0]
             newEmployee = Employee.objects.create(user_id=id)
             newEmployee.save()
             sendNewUserEmail(id)

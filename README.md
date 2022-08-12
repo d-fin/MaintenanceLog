@@ -102,3 +102,6 @@
     ```
 # ---------------------------------------------------------
 # Deploy
+
+- deployed on AWS with an RDS MySQL instance 
+- visit the site: www.bobandkays-maintenancelog.app
