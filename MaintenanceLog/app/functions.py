@@ -18,6 +18,7 @@ def sendNewUserEmail(newUserID):
     adminName = admin[0][0]
     adminEmail = admin[0][1]
     """
+    pdb.set_trace()
     df = pd.DataFrame(User.objects.all().values().filter(id=newUserID))
     adminName = 'David Finley'
     adminEmail = 'dfinley5656@gmail.com'

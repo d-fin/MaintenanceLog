@@ -375,7 +375,7 @@
             console.log(type)
             console.log(id)
             $.ajax({
-                url: "http://127.0.0.1:8000/saveSchedule",
+                url: "{% url 'saveSchedule' %}",
                 type: "POST",
                 beforeSend: function (xhr, settings) {
                         xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');

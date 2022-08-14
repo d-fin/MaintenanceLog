@@ -2,7 +2,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.admin import * 
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout 
+from django.contrib.auth import authenticate, login, logout
 from .forms import CreateUserForm, updateCompValueForm, editProfileForm
 from django.contrib.auth.decorators import login_required
 from django.db.models import Max
@@ -16,6 +16,7 @@ import pandas as pd
 from dateutil.relativedelta import relativedelta
 
 from app.functions import *
+
 # Create your views here.
 
 # MAIN PAGES 
@@ -341,16 +342,7 @@ def register(request):
             emailCopy = email 
             emailCopy = emailCopy.split("@")
             username = emailCopy[0]
-            
-            """ newUser = User()
-            newUser.first_name = first_name 
-            newUser.last_name = last_name 
-            newUser.email = email 
-            newUser.password = form.cleaned_data.get('password1')
-            newUser.username = username 
-            newUser.is_staff = 1
-            
-            newUser. """
+       
             password = form.cleaned_data.get('password1')
             newUser = User.objects.create_user(username=username, email=email, password=password, first_name=first_name, last_name=last_name)
    
@@ -371,33 +363,39 @@ def register(request):
 #User login page 
 def loginUser(request):
     if request.method == 'POST':
-        
         email = request.POST.get('username')
         password = request.POST.get('password')
-
         if '@' not in email: 
             pass
         else:
-            user = User.objects.all().values_list('username').filter(email=email)
-            username= user[0][0]
-            user = authenticate(request, username = username, password = password)
-            siteCode = None 
-            if user is not None:
-                login(request, user)
-                id = user.id 
-                emp = Employee.objects.all().values().filter(user_id=id)
-                siteCode = emp[0]['site']
-                request.session['siteCode'] = siteCode
-                return redirect('home')
-            else:
-                messages.error(request, "Error logging in")
-        
+            try: 
+                user = User.objects.all().values_list('username').filter(email=email)
+                username= user[0][0]
+                user = authenticate(request, username = username, password = password)
+                siteCode = None 
+            except Exception: 
+                messages.error(request, "User does not exist. Please register!")
+                return render(request, 'login.html')
+            else: 
+                try: 
+                    if user is not None:
+                        login(request, user)
+                        id = user.id 
+                        emp = Employee.objects.all().values().filter(user_id=id)
+                        siteCode = emp[0]['site']
+                        request.session['siteCode'] = siteCode
+                        return redirect('home')
+                    else:
+                        messages.error(request, "Error logging in")
+                        raise Exception()
+                except Exception: return render(request, 'login.html')
+                
     return render(request, 'login.html')
 
 # user logout page
 def logoutUser(request):
     logout(request)
-    return redirect('home')
+    return redirect('login')
 
 # user account
 def userAccount(request):
@@ -447,6 +445,7 @@ def edit_profile(request):
             email = form.cleaned_data.get('email')
             username = form.cleaned_data.get('username')
             site = form.cleaned_data.get('site')
+
             # update auth_user 
             userData = User.objects.get(id=id)
             name = name.split(" ")
@@ -494,125 +493,130 @@ def saveHydrHoseDate(request):
         else: dateString = year + "/" + month + "/" + day
         finally: 
             value = parser.parse(dateString)
-    if type == 'dateReplaced':
-        obj = HydraulicHoses.objects.get(id=id)
-        obj.dateReplaced = value 
-        obj.save()
-
-    return JsonResponse({"success" : "Updated"})
+            obj = HydraulicHoses.objects.get(id=id)
+            obj.dateReplaced = value 
+            obj.save()
+            return JsonResponse({"success" : "Updated"})
+    
+    return JsonResponse({"failure" : "Data not updated"})
 
 def saveInventory(request):
-    siteCode = request.session['siteCode']
-    delete = request.POST.get('delete', '')
-    if delete == "True":
-        id = int(request.POST.get('id', ''))
-        data = Inventory.objects.get(id=id)
-        data.delete()
+    try: 
+        siteCode = request.session['siteCode']
+        delete = request.POST.get('delete', '')
+    except Exception: 
+        return JsonResponse({"error" : "couldn't update inventory"})
+    else: 
+        if delete == "True":
+            id = int(request.POST.get('id', ''))
+            data = Inventory.objects.get(id=id)
+            data.delete()
+            return JsonResponse({"success" : "Updated"})
+        elif delete == "False":
+            id = request.POST.get('id', '')
+            value = request.POST.get('value', '')
+            type = request.POST.get("type", '')
+            if id == "":
+                maxId = Inventory.objects.aggregate(Max('id'))
+                maxId = int(maxId['id__max'])
+                newId = int(maxId) + 1
+                newObj = Inventory(newId, "Enter a part name", None, 0, siteCode)
+                newObj.save()
+            else:
+                inventoryData = Inventory.objects.get(id=id)
+                if type == 'partName':
+                    inventoryData.partName = value 
+                if type == 'modelNumber':
+                    inventoryData.modelNumber = value
+                if type == 'quantity':
+                    inventoryData.quantity = value 
+                inventoryData.save()
+        return JsonResponse({"success" : "Updated"})
 
-    if delete == "False":
+def updateNotes(request):
+    try: 
         id = request.POST.get('id', '')
         value = request.POST.get('value', '')
         type = request.POST.get("type", '')
-        if id == "":
-            maxId = Inventory.objects.aggregate(Max('id'))
-            maxId = int(maxId['id__max'])
-            newId = int(maxId) + 1
-            #if type == "" or value == "":
-            newObj = Inventory(newId, "Enter a part name", None, 0, siteCode)
-            newObj.save()
-        else:
-            inventoryData = Inventory.objects.get(id=id)
-            if type == 'partName':
-                inventoryData.partName = value 
-            if type == 'modelNumber':
-                inventoryData.modelNumber = value
-            if type == 'quantity':
-                inventoryData.quantity = value 
-            inventoryData.save()
-        
-    return JsonResponse({"success" : "Updated"})
-
-def updateNotes(request):
-    id = request.POST.get('id', '')
-    value = request.POST.get('value', '')
-    type = request.POST.get("type", '')
-    delete = request.POST.get('delete', '')
-
-    if delete == "True":
-        compData = Maintenance.objects.get(id=id)
-        compData.notes = "Enter notes here"
-        compData.save()
-    else:  
-        if type == 'notes':
+        delete = request.POST.get('delete', '')
+    except Exception:
+        return JsonResponse({"errror" : "could not update values"})
+    else: 
+        if delete == "True":
             compData = Maintenance.objects.get(id=id)
-            currentNotes = str(compData.notes) 
-            allNotes = currentNotes + "\n" + value
-            compData.notes = allNotes 
+            compData.notes = "Enter notes here"
             compData.save()
+        else:  
+            if type == 'notes':
+                compData = Maintenance.objects.get(id=id)
+                currentNotes = str(compData.notes) 
+                allNotes = currentNotes + "\n" + value
+                compData.notes = allNotes 
+                compData.save()
 
-    return JsonResponse({"success" : "Updated"})
+        return JsonResponse({"success" : "Updated"})
 
 def saveSchedule(request):
-    id = request.POST.get('id', '')
-    value = request.POST.get('value', '')
-    type = request.POST.get("type", '')
-    
-    dateString, day, month, year = None, None, None, None
-    if type == "name" or type == "notes2":
-        pass 
-    else:
-        try: 
-            data = value.split("/")
-            month = data[0]
-            day = data[1] 
-            year = data[2] 
-        except Exception as e: 
-            print(e)
-            dateString = value
-        else: dateString = year + "/" + month + "/" + day
-        finally: 
-            value = parser.parse(dateString)
-
-    
-    if type == "name" or type == "dateReplaced" or type == "dueDate" or type == "notes2":
-        compData = Maintenance.objects.get(id=id)
-        if type == "name":
-            compData.component = value 
-        if type == "dateReplaced":
-            compData.dateReplaced = value 
-            newDueDate = value + relativedelta(months=6)
-            compData.dueDate = newDueDate
-        if type == "dueDate":
-            compData.dueDate = value 
-        if type == "notes2":
-            compData.notes = value 
-        compData.save()
-
-    else:
-        brushComp = BrushComponent.objects.get(brushID=id)
-        brushData = Brush.objects.get(id=id)
-        if type == "side":
-            brushData.side = value
-        if type == "setNum":
-            brushData.setNum = value
-        if type == "motor":
-            brushComp.motor = value
-        if type == "shaft":
-            brushComp.shaft = value
-        if type == "bearings":
-            brushComp.bearings = value
-        if type == "upperBearings":
-            brushComp.upperBearings = value
-        if type == "cloth":
-            brushComp.cloth = value
-        if type == "shocks":
-            brushComp.shocks = value 
-
-        if type == "side" or type == "setNum":
-            brushData.save()
+    try: 
+        id = request.POST.get('id', '')
+        value = request.POST.get('value', '')
+        type = request.POST.get("type", '')
+    except Exception: 
+        return JsonResponse({"error" : "could not update schedule"})
+    else: 
+        dateString, day, month, year = None, None, None, None
+        if type == "name" or type == "notes2":
+            pass 
         else:
-            brushComp.save()
+            try: 
+                data = value.split("/")
+                month = data[0]
+                day = data[1] 
+                year = data[2] 
+            except Exception as e: 
+                print(e)
+                dateString = value
+            else: dateString = year + "/" + month + "/" + day
+            finally: 
+                value = parser.parse(dateString)
+                if type == "name" or type == "dateReplaced" or type == "dueDate" or type == "notes2":
+                    compData = Maintenance.objects.get(id=id)
+                    if type == "name":
+                        compData.component = value 
+                    if type == "dateReplaced":
+                        compData.dateReplaced = value 
+                        newDueDate = value + relativedelta(months=6)
+                        compData.dueDate = newDueDate
+                    if type == "dueDate":
+                        compData.dueDate = value 
+                    if type == "notes2":
+                        compData.notes = value 
+                    compData.save()
 
-    return JsonResponse({"success" : "Updated"})
+                else:
+                    brushComp = BrushComponent.objects.get(brushID=id)
+                    brushData = Brush.objects.get(id=id)
+                    if type == "side":
+                        brushData.side = value
+                    elif type == "setNum":
+                        brushData.setNum = value
+                    elif type == "motor":
+                        brushComp.motor = value
+                    elif type == "shaft":
+                        brushComp.shaft = value
+                    elif type == "bearings":
+                        brushComp.bearings = value
+                    elif type == "upperBearings":
+                        brushComp.upperBearings = value
+                    elif type == "cloth":
+                        brushComp.cloth = value
+                    elif type == "shocks":
+                        brushComp.shocks = value 
+                if type == "side" or type == "setNum":
+                    brushData.save()
+                else:
+                    brushComp.save()
+
+                return JsonResponse({"success" : "Updated"})
 
 # ------------------------------------------------------------------------------------

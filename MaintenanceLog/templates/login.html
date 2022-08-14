@@ -36,7 +36,16 @@
                         </div>
                     </form>
                 </div>
-
+                {% if messages %}
+                    {% for message in messages %}
+                    <br>
+                    <div class="form-group">
+                         <ul>
+                            <li>{{ message }}</li>
+                        </ul>
+                    </div>
+                    {% endfor %}
+                {% endif %}
                 <br><br>
                 <div class="d-flex justify-content-center">
                     <p class="text-muted">Don't have an account? <a href="{% url 'register' %}"

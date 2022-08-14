@@ -61,6 +61,21 @@
     }
 </style>
 <script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+            const cookies = document.cookie.split(";");
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
     function refresh_page() {
         window.location.reload();
         console.log("Refresh");
@@ -76,12 +91,12 @@
             console.log(type)
             console.log(id)
             $.ajax({
-                url: "http://127.0.0.1:8000/saveInventory",
+                url: "{% url 'saveInventory' %}",
                 type: "POST",
                 beforeSend: function (xhr, settings) {
-                    xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+                    xhr.setRequestHeader("X-CSRFToken", getCookie("csrftoken"));
                 },
-                data: { id: id, type: type, value: value, delete: "True" },
+                data: { id: id, type: type, value: value, delete: "True"},
             })
                 .done(function (response) {
                     refresh_page()
@@ -94,19 +109,6 @@
     }
 
     function insert_Row() {
-        /*  var x = document.getElementById('inventory-table').insertRow();
-         var y = x.insertCell(0);
-         var z = x.insertCell(1);
-         var a = x.insertCell(2)
-         y.className = 'editable';
-         z.className = 'editable';
-         a.className = 'editable';
-         y.setAttribute('data-type', 'partName');
-         z.setAttribute('data-type', 'modelNumber');
-         a.setAttribute('data-type', 'quantity');
-         y.innerHTML="New Cell";
-         z.innerHTML="New Cell";
-         a.innerHTML="0"; */
         sendToServer("", "", "")
 
         function sendToServer(id, value, type) {
@@ -114,7 +116,7 @@
             console.log(type)
             console.log(id)
             $.ajax({
-                url: "http://127.0.0.1:8000/saveInventory",
+                url: "{% url 'saveInventory' %}",
                 type: "POST",
                 beforeSend: function (xhr, settings) {
                     xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
@@ -167,7 +169,7 @@
             console.log(type)
             console.log(id)
             $.ajax({
-                url: "http://127.0.0.1:8000/saveInventory",
+                url: "{% url 'saveInventory' %}",
                 type: "POST",
                 beforeSend: function (xhr, settings) {
                     xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
