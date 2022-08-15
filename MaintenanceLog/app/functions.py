@@ -10,15 +10,6 @@ from .models import *
 from dateutil.relativedelta import relativedelta
 
 def sendNewUserEmail(newUserID):
-    """ newUser = User.objects.all().values().filter(id=newUserID)
-    newUserData = [newUser[0]['username'], newUser[0]['email'], newUser[0]['date_joined']]
-    df = pd.DataFrame([newUserData], columns=['username', 'email', 'datejoined'])
-
-    admin = User.objects.all().values_list('username', 'email').filter(id=17)
-    adminName = admin[0][0]
-    adminEmail = admin[0][1]
-    """
-    pdb.set_trace()
     df = pd.DataFrame(User.objects.all().values().filter(id=newUserID))
     adminName = 'David Finley'
     adminEmail = 'dfinley5656@gmail.com'
@@ -29,7 +20,7 @@ def sendNewUserEmail(newUserID):
         settings.EMAIL_HOST_USER,
         [adminEmail]
     )
-     # in production set fail_silently=True
+    # in production set fail_silently=True
     email.fail_silently = False 
     email.send()
 

@@ -75,7 +75,8 @@ def home(request):
     email = request.user.email 
     username = request.user.username 
     #sendBrushUpdateEmail(username, email, siteCode)
- 
+    data = getSpecificBrushData("Wrap Brush", siteCode)
+    pdb.set_trace()
     context = {
         'df' : maintenanceData,
         'curtains' : curtains,
